@@ -72,6 +72,7 @@ jobs:
         env:
           DATANEST_RELEASE_SHA: ${{ github.sha }}
           DATANEST_DB_RELEASE: "staging-certification-current"
+          DATANEST_SUPABASE_PROJECT: "qchttpcyqlqnhvahprhz"
         run: node scripts/write-release-manifest.mjs public/release-manifest.json
 
       - name: Write immutable Mirror release manifest
