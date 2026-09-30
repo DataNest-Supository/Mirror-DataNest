@@ -308,11 +308,11 @@ export default function AuthGate() {
         <h2 id="landing-title">Your intent.<br/><span>Amplified.</span></h2>
         <p className="landingLede">Develop, test and evolve Resonance DataNest and related products in a focused owner workspace. Experiment freely, inspect live behavior, and keep governed collaborative work in DataNest-Supository/DataNest.</p>
         <CollaborationVisual/>
-        <ol className="landingSteps" aria-label="The Resonance workflow">
-          <li><span>01</span><b>Spark</b><small>Capture intent</small></li>
-          <li><span>02</span><b>Think</b><small>Explore with AI</small></li>
-          <li><span>03</span><b>Govern</b><small>Review decisions</small></li>
-          <li><span>04</span><b>Execute</b><small>Track the work</small></li>
+        <ol className="landingSteps" aria-label="The owner R&D workflow">
+          <li><span>01</span><b>Build</b><small>Shape the product</small></li>
+          <li><span>02</span><b>Experiment</b><small>Explore with AI</small></li>
+          <li><span>03</span><b>Inspect</b><small>Test live behavior</small></li>
+          <li><span>04</span><b>Ship candidate</b><small>Deploy independently</small></li>
         </ol>
       </section>
       <section className="authCard landingSignIn" aria-labelledby="sign-in-title">
