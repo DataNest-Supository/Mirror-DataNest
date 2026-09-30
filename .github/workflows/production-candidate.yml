@@ -41,17 +41,14 @@ jobs:
 
       - name: Unit-test observation
         id: tests
-        continue-on-error: true
         run: node scripts/mirror-test-suite.mjs
 
       - name: Type-check observation
         id: typecheck
-        continue-on-error: true
         run: npm run check
 
       - name: Dependency-audit observation
         id: audit
-        continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
 
       - name: Validate canonical base
@@ -70,6 +67,15 @@ jobs:
             echo "Refresh Mirror from DataNest/main or select the correct shared base before packaging production."
             exit 1
           fi
+
+      - name: Enforce production-candidate evidence gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ steps.tests.outcome }}" = "success"
+          test "${{ steps.typecheck.outcome }}" = "success"
+          test "${{ steps.audit.outcome }}" = "success"
+          echo "Blocking Mirror evidence gate passed; packaging may proceed."
 
       - name: Build production-candidate package
         shell: bash

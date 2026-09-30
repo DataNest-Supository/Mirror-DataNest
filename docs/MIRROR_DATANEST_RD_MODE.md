@@ -9,6 +9,18 @@ The Mirror has two linked jobs:
 1. allow rapid R&D without canonical production approval gates on every experiment;
 2. deploy the selected candidate as a real public Mirror UI so humans and browser automation can test the actual rendered pages before certification.
 
+## Fast-lane R&D contract
+
+Mirror is intentionally non-governed for experiment iteration, not non-evidenced for production promotion.
+
+- Pushes to main may publish a live candidate automatically so R&D can review the real rendered UI quickly.
+- Pre-deployment test, type-check and dependency-audit results remain visible observations and do not block live experimentation.
+- A production-candidate package is different: unit tests, type checking and the dependency audit are blocking evidence, and the live Mirror verification reference remains mandatory.
+- Canonical production remains a separate authority boundary. No Mirror workflow may deploy or overwrite the canonical DataNest Pages site, production backend, or governance state.
+- Canonical refresh is watched every 15 minutes and skipped when the current canonical main commit is already an ancestor of Mirror main.
+
+This keeps the R&D loop fast while preserving the existing DataNest governance firewall: evidence can accelerate review, but Mirror cannot approve, ratify, certify, or deploy canonical production.
+
 ## Live Mirror candidate
 
 Preferred public candidate identity:

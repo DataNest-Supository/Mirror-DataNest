@@ -2,7 +2,7 @@ name: Refresh from Canonical DataNest
 
 on:
   schedule:
-    - cron: "23 2 * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -37,8 +37,9 @@ jobs:
           MIRROR_SHA="$(git rev-parse origin/main)"
           echo "canonical_sha=$CANONICAL_SHA" >> "$GITHUB_OUTPUT"
           echo "mirror_sha=$MIRROR_SHA" >> "$GITHUB_OUTPUT"
-          if [ "$CANONICAL_SHA" = "$MIRROR_SHA" ]; then
+          if git merge-base --is-ancestor "$CANONICAL_SHA" "$MIRROR_SHA"; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Canonical main is already contained in Mirror main."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -48,7 +49,8 @@ jobs:
         id: branch
         shell: bash
         run: |
-          BRANCH="sync/canonical-main-${GITHUB_SHA}"
+          CANONICAL_SHA="${{ steps.compare.outputs.canonical_sha }}"
+          BRANCH="sync/canonical-main-${CANONICAL_SHA:0:12}"
           git checkout -B "$BRANCH" canonical/main
           git push --force-with-lease origin "$BRANCH"
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
@@ -64,4 +66,4 @@ jobs:
             echo "Refresh PR already exists for $BRANCH"
             exit 0
           fi
-          gh pr create --base main --head "$BRANCH" --title "Sync canonical DataNest main into R&D mirror" --body "Canonical DataNest/main moved to ${{ steps.compare.outputs.canonical_sha }}. This PR refreshes the R&D baseline only; it does not deploy to canonical production or change production governance. Resolve any mirror-only R&D conflicts explicitly."
+          gh pr create --base main --head "$BRANCH" --title "Sync canonical DataNest main into R&D mirror" --body "Canonical DataNest/main moved to ${{ steps.compare.outputs.canonical_sha }}. This refreshes the R&D baseline only; it does not deploy to canonical production or change production governance. The 15-minute watcher skips refresh PRs when canonical is already an ancestor of Mirror main. Resolve any mirror-only R&D conflicts explicitly."

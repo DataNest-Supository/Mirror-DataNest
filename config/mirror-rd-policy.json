@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "mode": "production-parity-rd-test",
   "repository": "DataNest-Supository/Mirror-DataNest",
   "canonicalRepository": "DataNest-Supository/DataNest",
@@ -45,6 +45,17 @@
       "rollback note",
       "Audit Optimizer reference",
       "canonical governance approval"
-    ]
+    ],
+    "refreshIntervalMinutes": 15,
+    "canonicalContainmentCheck": "skip-refresh-when-canonical-main-is-an-ancestor-of-mirror-main",
+    "liveReviewReference": "mirror-live-verification workflow/artifact"
+  },
+  "fastLane": {
+    "directMirrorMainDeploy": true,
+    "preDeploymentChecks": "advisory",
+    "liveCandidateReview": "required",
+    "productionCandidateEvidence": "blocking",
+    "canonicalProductionAuthority": false,
+    "canonicalGovernanceAuthority": false
   }
 }
