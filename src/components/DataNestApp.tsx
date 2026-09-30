@@ -2542,7 +2542,7 @@ function Settings({
     <div className="panel"><p className="eyebrow">TOOLS</p><h3>Tool registry</h3>{tools.map(tool=><div className="settingRow" key={tool.id}><div><b>{tool.name}</b><small>{tool.role}</small></div><Badge value={tool.enabled?"ACTIVE":"DISABLED"}/></div>)}</div>
     <RonsasIntegrationPanel/>
     {project&&(membership?.role==="owner"||membership?.role==="admin")&&<div className="fullWidth" aria-label="R&D Device Administration"><RndDeviceAdministration projectId={project.id} role={membership.role}/></div>}
-    {project&&(membership?.role==="owner"||membership?.role==="admin")&&<div className="fullWidth" aria-label="R&D Test Mode"><RndTestModeToggle projectId={project.id} role={membership.role}/></div>}
+    {process.env.NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE==="true"&&project&&(membership?.role==="owner"||membership?.role==="admin")&&<div className="fullWidth" aria-label="R&D Test Mode"><RndTestModeToggle projectId={project.id} role={membership.role}/></div>}
     <div className="fullWidth accountSecurityAnchor" id="account-security" tabIndex={-1}>{project&&<AccountPasswordPanel projectId={project.id}/>}</div>
     {project&&<RecoveryDiagnosticsPanel projectId={project.id} hydrated={recoveryHydrated} ledgerError={recoveryLedgerError} lastSyncedAt={recoveryLastSyncedAt} syncing={recoverySyncing} onSync={synchronizeDurableRecoveries}/>}
     {project&&<div className="fullWidth" aria-label="AI Administration">
