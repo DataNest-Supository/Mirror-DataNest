@@ -1,46 +1,50 @@
 {
-  "schemaVersion": 1,
-  "mode": "mirror-rd-test",
+  "schemaVersion": 2,
+  "mode": "production-parity-rd-test",
   "repository": "DataNest-Supository/Mirror-DataNest",
   "canonicalRepository": "DataNest-Supository/DataNest",
-  "purpose": "Ungated R&D test mode for optimizing Resonance AppDev code, build, delivery and deployment before governed promotion.",
+  "purpose": "Ungated R&D plus live production-parity visual/functional testing before governed canonical certification.",
   "authority": {
     "sourceOfTruth": false,
-    "productionAuthority": false,
-    "releaseAuthority": false,
+    "mirrorCandidateDeployment": true,
+    "canonicalProductionDeployment": false,
+    "canonicalReleaseAuthority": false,
     "governanceAuthority": false
   },
   "gates": {
     "humanApprovalInsideMirrorRequired": false,
     "requiredPullRequestInsideMirror": false,
-    "requiredEnvironmentApprovalInsideMirror": false,
-    "requiredQualityChecksInsideMirror": false
+    "liveMirrorEvidenceRequiredBeforeProductionCandidate": true,
+    "canonicalGovernanceRequiredBeforeLiveProduction": true
   },
   "boundaries": {
-    "productionWritesAllowed": false,
+    "productionBackendWritesAllowed": false,
     "productionSecretsAllowed": false,
-    "productionDatabaseMutationAllowed": false,
     "canonicalPagesDeploymentAllowed": false,
     "canonicalRepositoryDirectPushAllowed": false
   },
-  "preview": {
-    "preferredPath": "https://datanest-supository.github.io/Mirror-DataNest/",
-    "backendPolicy": "Use isolated R&D/free-tier backend configuration. Do not default to production backend write access.",
-    "environment": "mirror-rd-pages"
+  "liveCandidate": {
+    "publicUrl": "https://datanest-supository.github.io/Mirror-DataNest/",
+    "basePath": "/Mirror-DataNest",
+    "backendProject": "qchttpcyqlqnhvahprhz",
+    "backendName": "DataNest AI Staging",
+    "releaseManifest": "mirror-release.json",
+    "liveVerification": "mirror-live-verification.json",
+    "evidencePurpose": "Visual and functional testing of the exact production candidate."
   },
   "synchronization": {
-    "direction": "Mirror-DataNest -> promotion branch in DataNest -> pull request -> human reviewer -> main",
+    "direction": "Mirror live candidate -> production candidate -> DataNest mirror-promotion/* -> Audit Optimizer -> governance/human approval -> DataNest/main -> canonical live",
     "directMirrorToMainSyncAllowed": false,
     "humanReviewerApprovalRequired": true,
     "evidenceRequired": [
-      "selected mirror commit(s)",
+      "exact Mirror commit",
+      "live Mirror verification reference",
+      "visual/functional Product Lab evidence",
       "test/build observations",
-      "deployment/preview observations",
       "known regressions",
-      "rollback note"
-    ],
-    "refreshWorkflow": ".github/workflows/sync-canonical.yml",
-    "refreshModel": "scheduled/manual canonical-main refresh PR into mirror main",
-    "productionPromotion": "R&D candidate -> canonical DataNest draft PR -> human approval -> DataNest/main -> governed production workflow"
+      "rollback note",
+      "Audit Optimizer reference",
+      "canonical governance approval"
+    ]
   }
 }
