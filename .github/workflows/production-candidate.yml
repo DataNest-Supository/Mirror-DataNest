@@ -42,7 +42,7 @@ jobs:
       - name: Unit-test observation
         id: tests
         continue-on-error: true
-        run: npm test
+        run: node scripts/mirror-test-suite.mjs
 
       - name: Type-check observation
         id: typecheck
