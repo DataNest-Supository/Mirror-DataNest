@@ -49,21 +49,28 @@ jobs:
         id: branch
         shell: bash
         run: |
-          CANONICAL_SHA="${{ steps.compare.outputs.canonical_sha }}"
-          BRANCH="sync/canonical-main-${CANONICAL_SHA:0:12}"
+          set -euo pipefail
+          CANONICAL_SHA="$(git rev-parse canonical/main)"
+          SHORT_SHA="$(printf '%s' "$CANONICAL_SHA" | cut -c1-12)"
+          BRANCH="sync/canonical-main-$SHORT_SHA"
           git checkout -B "$BRANCH" canonical/main
+          git checkout origin/main -- .github/workflows
+          git add .github/workflows
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Preserve Mirror-owned Actions workflows"
+          fi
           git push --force-with-lease origin "$BRANCH"
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Create mirror refresh PR
         if: steps.compare.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: $GITHUB_TOKEN
         shell: bash
         run: |
-          BRANCH="${{ steps.branch.outputs.name }}"
+          BRANCH="sync/canonical-main-$(git rev-parse canonical/main | cut -c1-12)"
           if gh pr list --head "$BRANCH" --base main --json number --jq '.[0].number' | grep -q .; then
             echo "Refresh PR already exists for $BRANCH"
             exit 0
           fi
-          gh pr create --base main --head "$BRANCH" --title "Sync canonical DataNest main into R&D mirror" --body "Canonical DataNest/main moved to ${{ steps.compare.outputs.canonical_sha }}. This refreshes the R&D baseline only; it does not deploy to canonical production or change production governance. The 15-minute watcher skips refresh PRs when canonical is already an ancestor of Mirror main. Resolve any mirror-only R&D conflicts explicitly."
+          gh pr create --base main --head "$BRANCH" --title "Sync canonical DataNest main into R&D mirror" --body "Canonical DataNest/main moved. This refreshes the R&D baseline only; Mirror-owned Actions workflows remain authoritative for Mirror execution and Pages publication."
