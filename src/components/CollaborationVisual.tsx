@@ -234,12 +234,12 @@ export default function CollaborationVisual({
       <small>DATANEST CORE</small>
       <strong>DataNest AI</strong>
       <span>Shared intelligence</span>
-      <button type="button" onClick={()=>onOpenProducts?.()}>
+      <button type="button" onClick={()=>onOpenProducts?.()} aria-label="Open governed products">
         <span>Open Products</span><b aria-hidden="true">↗</b>
       </button>
     </div>
 
-    <span className={styles.portfolioCaption} aria-live="polite">
+    <span id="catalog-sync-status" className={styles.portfolioCaption} aria-live="polite">
       {loading
         ?"Live catalog sync"
         :error
@@ -253,8 +253,10 @@ export default function CollaborationVisual({
       className={styles.catalogRetry}
       onClick={()=>setReloadToken(token=>token+1)}
       disabled={loading}
+      aria-controls="catalog-sync-status"
+      aria-label={loading ? "Retrying catalog sync" : "Retry catalog synchronization"}
     >
-      Retry catalog sync
+      {loading ? "Syncing catalog…" : "Retry catalog sync"}
     </button>}
   </div>;
 }
