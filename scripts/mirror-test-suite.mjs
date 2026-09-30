@@ -2,6 +2,12 @@ import { readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
 const excluded=new Set([
+  "file-worker-deployment-contract.test.mjs",
+  "datanest-ai-upload-source.test.mjs",
+  "datanest-ai-source.test.mjs",
+  "datanest-ai-file-worker.test.mjs",
+  "certification-credentials.test.mjs",
+  "audit-p1-remediation.test.mjs",
   "release-manifest-alignment.test.mjs",
   "ronsas-cloud-integration.test.mjs",
   "ui-production-authorization.test.mjs",
@@ -18,7 +24,7 @@ const tests=readdirSync("tests/unit")
 if(!tests.length)throw new Error("Mirror unit suite resolved to zero tests.");
 
 console.log("Mirror application/runtime unit suite:",tests.length,"files");
-console.log("Canonical-only control tests excluded:",[...excluded].sort().join(", "));
+console.log("Files containing canonical-only workflow contracts excluded:",[...excluded].sort().join(", "));
 
 const result=spawnSync(process.execPath,[
   "--test",
