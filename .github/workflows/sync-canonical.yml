@@ -1,0 +1,67 @@
+name: Refresh from Canonical DataNest
+
+on:
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: canonical-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Open mirror refresh PR when canonical main moves
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout mirror main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch canonical DataNest main
+        shell: bash
+        run: |
+          git remote add canonical https://github.com/DataNest-Supository/DataNest.git
+          git fetch canonical main --prune
+
+      - name: Compare canonical and mirror
+        id: compare
+        shell: bash
+        run: |
+          CANONICAL_SHA="$(git rev-parse canonical/main)"
+          MIRROR_SHA="$(git rev-parse origin/main)"
+          echo "canonical_sha=$CANONICAL_SHA" >> "$GITHUB_OUTPUT"
+          echo "mirror_sha=$MIRROR_SHA" >> "$GITHUB_OUTPUT"
+          if [ "$CANONICAL_SHA" = "$MIRROR_SHA" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare canonical refresh branch
+        if: steps.compare.outputs.changed == 'true'
+        id: branch
+        shell: bash
+        run: |
+          BRANCH="sync/canonical-main-${GITHUB_SHA}"
+          git checkout -B "$BRANCH" canonical/main
+          git push --force-with-lease origin "$BRANCH"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Create mirror refresh PR
+        if: steps.compare.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          BRANCH="${{ steps.branch.outputs.name }}"
+          if gh pr list --head "$BRANCH" --base main --json number --jq '.[0].number' | grep -q .; then
+            echo "Refresh PR already exists for $BRANCH"
+            exit 0
+          fi
+          gh pr create --base main --head "$BRANCH" --title "Sync canonical DataNest main into R&D mirror" --body "Canonical DataNest/main moved to ${{ steps.compare.outputs.canonical_sha }}. This PR refreshes the R&D baseline only; it does not deploy to canonical production or change production governance. Resolve any mirror-only R&D conflicts explicitly."
