@@ -26,6 +26,9 @@ jobs:
         continue-on-error: true
         run: node scripts/mirror-test-suite.mjs
 
+      - name: Governance control effectiveness contract
+        run: node --test --experimental-strip-types tests/unit/governance-control-effectiveness-monitoring.test.mjs
+
       - name: Type check
         id: typecheck
         continue-on-error: true
