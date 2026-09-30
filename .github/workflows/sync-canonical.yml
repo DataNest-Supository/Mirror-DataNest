@@ -54,7 +54,18 @@ jobs:
           SHORT_SHA="$(printf '%s' "$CANONICAL_SHA" | cut -c1-12)"
           BRANCH="sync/canonical-main-$SHORT_SHA"
           git checkout -B "$BRANCH" canonical/main
+
+          # Canonical provides the application baseline, but Mirror owns its
+          # workflow surface. Remove canonical-only workflow files before push
+          # so the GitHub App never attempts to create/update workflows it
+          # does not own and therefore does not need the workflows permission.
           git checkout origin/main -- .github/workflows
+          while IFS= read -r workflow_file; do
+            if ! git ls-tree -r --name-only origin/main -- .github/workflows | grep -Fxq "$workflow_file"; then
+              git rm -f "$workflow_file"
+            fi
+          done < <(git ls-files .github/workflows)
+
           git add .github/workflows
           if ! git diff --cached --quiet; then
             git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Preserve Mirror-owned Actions workflows"
