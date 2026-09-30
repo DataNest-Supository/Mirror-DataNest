@@ -23,6 +23,7 @@ const DataNestApp = dynamic(() => import("@/components/DataNestApp"), {
 
 type StartupState = "loading" | "signed-out" | "signed-in" | "set-password" | "config-error" | "connection-error";
 const STARTUP_TIMEOUT_MS = 10000;
+const OWNER_LOGIN_EMAIL = "iace1236912@gmail.com";
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return Promise.race([
@@ -37,7 +38,7 @@ export default function AuthGate() {
   const [startup, setStartup] = useState<StartupState>("loading");
   const [session, setSession] = useState<Session | null>(null);
   const [startupMessage, setStartupMessage] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(OWNER_LOGIN_EMAIL);
   const [password, setPassword] = useState("");
   const [newPassword, setNewPasswordValue] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
