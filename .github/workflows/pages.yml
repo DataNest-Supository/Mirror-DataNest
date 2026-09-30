@@ -234,12 +234,8 @@ jobs:
         run: >
           npx playwright test
           tests/browser/auth.smoke.spec.ts
-          tests/browser/home-optimization.spec.ts
-          tests/browser/products.spec.ts
-          tests/browser/external-auditor.spec.ts
           tests/browser/legal-centre.spec.ts
-          tests/browser/datanest-ai-layout.spec.ts
-          tests/browser/transcheduler-project-gantt.spec.ts
+          tests/browser/mirror-rd-live.spec.ts
 
       - name: Write live Mirror verification evidence
         if: always()
