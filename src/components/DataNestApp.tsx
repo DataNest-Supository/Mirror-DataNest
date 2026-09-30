@@ -134,7 +134,7 @@ const nav:Array<NavigationItem & {key:ViewKey;glyph:string}> = [
   {key:"checkpoints",label:"Recovery",group:"Observe",glyph:"↺",id:"checkpoints",phase:"verify",keywords:["checkpoint","recovery","resume"]},
   {key:"audit",label:"Evidence",group:"Observe",glyph:"≡",id:"audit",phase:"verify",keywords:["audit","evidence","traceability"]},
   {key:"settings",label:"Owner Settings",group:"System",glyph:"⚙",id:"settings",phase:null,keywords:["settings","owner","runtime"]}
-
+];
 
 type CommandItem =
   | {kind:"view";id:ViewKey;key:ViewKey;label:string;group:string;glyph:string;description:string}
@@ -281,9 +281,9 @@ const DataNestAiWorkspace = dynamic(() => import("@/components/DataNestAiWorkspa
   loading: () => <section className="panel"><p className="muted">Loading DataNest AI…</p></section>
 });
 
-const DataNestDashboard = dynamic(() => import("@/components/DataNestDashboard"), {
+const DataNestDashboard = dynamic(() => import("@/components/OwnerRDCockpit"), {
   ssr: false,
-  loading: () => <section className="panel"><p className="muted">Loading DataNest Control Center…</p></section>
+  loading: () => <section className="panel"><p className="muted">Loading Owner R&D Cockpit…</p></section>
 });
 
 const AiOperationsDashboard = dynamic(() => import("@/components/AiOperationsDashboard"), {
