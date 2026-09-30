@@ -90,7 +90,7 @@ jobs:
             exit 1
           fi
 
-          jq -n             --arg schemaVersion "mirror-production-candidate-v1"             --arg repository "$GITHUB_REPOSITORY"             --arg mirrorSha "$GITHUB_SHA"             --arg canonicalBaseSha "$BASE_SHA"             --arg candidateName "$CANDIDATE_NAME"             --arg summary "$CANDIDATE_SUMMARY"             --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"             --arg mirrorLiveEvidence "$MIRROR_LIVE_EVIDENCE"             --arg unitTests "$TEST_OUTCOME"             --arg typeCheck "$TYPECHECK_OUTCOME"             --arg dependencyAudit "$AUDIT_OUTCOME"             --arg createdAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)"             '{
+          jq -n             --arg schemaVersion "mirror-production-candidate-v1"             --arg repository "$GITHUB_REPOSITORY"             --arg mirrorSha "$GITHUB_SHA"             --arg canonicalBaseSha "$BASE_SHA"             --arg candidateName "$CANDIDATE_NAME"             --arg summary "$CANDIDATE_SUMMARY"             --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"             --arg unitTests "$TEST_OUTCOME"             --arg typeCheck "$TYPECHECK_OUTCOME"             --arg dependencyAudit "$AUDIT_OUTCOME"             --arg createdAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)"             '{
               schemaVersion:$schemaVersion,
               repository:$repository,
               mirrorSha:$mirrorSha,
