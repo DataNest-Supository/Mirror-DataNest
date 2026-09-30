@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "mode": "mirror-rd-test",
+  "repository": "DataNest-Supository/Mirror-DataNest",
+  "canonicalRepository": "DataNest-Supository/DataNest",
+  "purpose": "Ungated R&D test mode for optimizing Resonance AppDev code, build, delivery and deployment before governed promotion.",
+  "authority": {
+    "sourceOfTruth": false,
+    "productionAuthority": false,
+    "releaseAuthority": false,
+    "governanceAuthority": false
+  },
+  "gates": {
+    "humanApprovalInsideMirrorRequired": false,
+    "requiredPullRequestInsideMirror": false,
+    "requiredEnvironmentApprovalInsideMirror": false,
+    "requiredQualityChecksInsideMirror": false
+  },
+  "boundaries": {
+    "productionWritesAllowed": false,
+    "productionSecretsAllowed": false,
+    "productionDatabaseMutationAllowed": false,
+    "canonicalPagesDeploymentAllowed": false,
+    "canonicalRepositoryDirectPushAllowed": false
+  },
+  "preview": {
+    "preferredPath": "https://datanest-supository.github.io/Mirror-DataNest/",
+    "backendPolicy": "Use isolated R&D/free-tier backend configuration. Do not default to production backend write access."
+  },
+  "synchronization": {
+    "direction": "Mirror-DataNest -> promotion branch in DataNest -> pull request -> human reviewer -> main",
+    "directMirrorToMainSyncAllowed": false,
+    "humanReviewerApprovalRequired": true,
+    "evidenceRequired": [
+      "selected mirror commit(s)",
+      "test/build observations",
+      "deployment/preview observations",
+      "known regressions",
+      "rollback note"
+    ]
+  }
+}
