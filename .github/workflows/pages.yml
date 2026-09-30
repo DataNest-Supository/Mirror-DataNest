@@ -179,10 +179,26 @@ jobs:
             return 1
           }
 
-          fetch_after_pages_propagation "$base/mirror-release.json" /tmp/mirror-release.json
-          grep -q "\"commit\":\"$GITHUB_SHA\"" /tmp/mirror-release.json
-          fetch_after_pages_propagation "$base/release-manifest.json" /tmp/release-manifest.json
-          grep -q '"projectInvitations":"send-project-member-invite@3"' /tmp/release-manifest.json
+          fetch_until_expected() {
+            local url="$1"
+            local output="$2"
+            local expected="$3"
+            local attempts=18
+            for attempt in $(seq 1 "$attempts"); do
+              if curl --fail --silent --show-error --location --retry 2 --retry-delay 2 --retry-all-errors "$url" -o "$output" &&
+                 grep -Fq "$expected" "$output"; then
+                return 0
+              fi
+              if [ "$attempt" -lt "$attempts" ]; then
+                sleep 5
+              fi
+            done
+            echo "::error::Mirror Pages resource did not expose the expected candidate content after propagation retries: $url"
+            return 1
+          }
+
+          fetch_until_expected "$base/mirror-release.json" /tmp/mirror-release.json "\"commit\":\"$GITHUB_SHA\""
+          fetch_until_expected "$base/release-manifest.json" /tmp/release-manifest.json '"projectInvitations":"send-project-member-invite@3"'
           # GitHub Pages serves the static shell/manifests here; application route reachability
           # is verified by the live Playwright suite below. Do not require every client-side
           # route or app path to exist as a standalone server resource.
