@@ -5397,3 +5397,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .authForm .primaryButton{min-height:48px;font-weight:850}
 .authForm .secondaryButton{min-height:44px}
 .landingSignIn .securityNote{margin-top:14px}
+/* 2026-09-30 Mirror sign-in loading affordance */
+.authForm[aria-busy="true"] .primaryButton,
+.authForm[aria-busy="true"] .secondaryButton{cursor:wait}
+.authForm[aria-busy="true"] input{opacity:.82}
+.authForm[aria-busy="true"] .primaryButton{position:relative}
+.authForm[aria-busy="true"] .primaryButton::after{content:"";display:inline-block;width:10px;height:10px;margin-left:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:mirrorAuthSpin .7s linear infinite}
+@keyframes mirrorAuthSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.authForm[aria-busy="true"] .primaryButton::after{animation:none}}
