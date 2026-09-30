@@ -43,8 +43,8 @@ const jetBrainsMono=JetBrains_Mono({
 
 // Keep focused DataNest AI refinements last so UX overrides remain authoritative.
 export const metadata = {
-  title: "DataNest",
-  description: "Plan projects, collaborate with DataNest AI, and review traceable work in one workspace."
+  title: "Mirror-DataNest · Resonance R&D",
+  description: "Single-owner R&D workspace for developing Resonance DataNest and related products and tools."
 };
 
 export default function RootLayout({children}:{children:ReactNode}) {
