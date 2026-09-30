@@ -15,8 +15,8 @@ const ronsasSnapshot=fs.readFileSync(path.join(root,"data/imports/ronsas-product
 test("Products is a first-class DataNest workspace",()=>{
   assert.match(app,/key:"products",label:"Products"/);
   assert.match(app,/view==="products"&&<ProductsWorkspace projectId={project.id} currentUserId={session.user.id} role={membership\?\.role\|\|"viewer"}\/>/);
-  assert.match(app,/Inspect governed products, linked architecture, controls, evidence and specialist experiences/);
-  assert.match(app,/Inspect governed Resonance products, their architecture, controls, evidence, risks and promotion branches/);
+  assert.match(app,/Evolve the Resonance product portfolio, related tools, architecture and candidate branches/);
+  assert.match(app,/Develop the Resonance portfolio and inspect product architecture and candidate branches/);
 });
 
 test("Resonance Assistance exposes Legal Eagle as its first live governed product",()=>{

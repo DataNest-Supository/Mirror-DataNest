@@ -9,9 +9,9 @@ const app=fs.readFileSync(path.join(root,"src/components/DataNestApp.tsx"),"utf8
 const dashboard=fs.readFileSync(path.join(root,"src/components/DataNestDashboard.tsx"),"utf8");
 const css=fs.readFileSync(path.join(root,"src/app/globals.css"),"utf8");
 
-test("DataNest exposes a dedicated Control Center workspace",()=>{
+test("DataNest exposes a dedicated owner R&D Cockpit workspace",()=>{
   assert.match(app,/type ViewKey = "dashboard"\|/);
-  assert.match(app,/key:"dashboard",label:"Control Center"/);
+  assert.match(app,/key:"dashboard",label:"R&D Cockpit"/);
   assert.match(app,/import\("@\/components\/DataNestDashboard"\)/);
   assert.match(app,/view==="dashboard"&&<DataNestDashboard/);
 });

@@ -16,8 +16,9 @@ const fullBrief=Array.from({length:8},(_,index)=>
   )
 ).join("");
 
-test("Transparency is a first-class DataNest continuity surface",()=>{
-  assert.match(app,/label:"Transparency"/);
+test("Published evidence remains accessible from the owner R&D workspace",()=>{
+  assert.match(app,/setView\("transparency"\)/);
+  assert.match(app,/>Published evidence</);
   assert.match(app,/view==="transparency"/);
   assert.match(workspace,/Audit library \+ public accountability record/);
 });

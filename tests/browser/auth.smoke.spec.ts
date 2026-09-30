@@ -14,7 +14,7 @@ test("renders the signed-out application without uncaught browser errors", async
 });
 
 test("shows a recoverable configuration error", async ({ page }) => {
-  await page.route("**/runtime-config.js", async (route) => {
+  await page.route(/\/runtime-config\.js(?:\?.*)?$/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/javascript",

@@ -1,21 +1,20 @@
 {
   "contract": "reson8-app@1",
-  "key": "datanest",
-  "name": "DataNest",
-  "publicUrl": "https://datanest-supository.github.io/DataNest/",
+  "key": "mirror-datanest",
+  "name": "Mirror-DataNest",
+  "publicUrl": "https://datanest-supository.github.io/Mirror-DataNest/",
   "hubUrl": "https://reson8.life/",
-  "sourceRepository": "DataNest-Supository/DataNest",
+  "sourceRepository": "DataNest-Supository/Mirror-DataNest",
   "sourceBranch": "main",
-  "authority": "DataNest",
-  "access": "invitation",
-  "status": "live",
+  "authority": "owner-rnd",
+  "access": "single-owner",
+  "status": "candidate",
   "billing": "none",
-  "runtimeConfigAuthority": "https://datanest-supository.github.io/DataNest/runtime-config.js",
-  "operationalUrl": "https://datanest-supository.github.io/DataNest/",
+  "runtimeConfigAuthority": "https://datanest-supository.github.io/Mirror-DataNest/runtime-config.js",
+  "operationalUrl": "https://datanest-supository.github.io/Mirror-DataNest/",
   "hubRegistration": {
-    "state": "pending",
-    "issue": "https://github.com/resonance36912-cell/resonance-hub/issues/136",
-    "statusEndpoint": "https://reson8.life/api/public/app-status/health"
+    "state": "not-registered",
+    "reason": "Owner R&D candidate; canonical Hub registration remains owned by DataNest."
   },
   "readiness": {
     "contract": "ronsas-status@1",
@@ -31,20 +30,22 @@
   },
   "delivery": {
     "provider": "GitHub Pages",
-    "status": "live",
-    "url": "https://datanest-supository.github.io/DataNest/",
-    "healthUrl": "https://datanest-supository.github.io/DataNest/health.json",
+    "status": "candidate",
+    "url": "https://datanest-supository.github.io/Mirror-DataNest/",
+    "healthUrl": "https://datanest-supository.github.io/Mirror-DataNest/health.json",
     "railwayRequired": false
   },
-  "displayName": "DataNest",
+  "displayName": "Mirror-DataNest",
   "canonicalHost": "datanest-supository.github.io",
-  "brandedUrl": "https://datanest-supository.github.io/DataNest/",
-  "brandedState": "live",
+  "brandedUrl": "https://datanest-supository.github.io/Mirror-DataNest/",
+  "brandedState": "candidate",
   "wire": {
-    "source": "https://datanest-supository.github.io/DataNest/",
-    "target": "https://datanest-supository.github.io/DataNest/",
+    "source": "https://datanest-supository.github.io/Mirror-DataNest/",
+    "target": "https://datanest-supository.github.io/Mirror-DataNest/",
     "mode": "direct",
     "applicationLayer": "not-required",
     "networkState": "not-applicable"
-  }
+  },
+  "canonicalRepository": "DataNest-Supository/DataNest",
+  "canonicalPublicUrl": "https://datanest-supository.github.io/DataNest/"
 }

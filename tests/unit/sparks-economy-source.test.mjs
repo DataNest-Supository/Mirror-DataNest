@@ -15,8 +15,8 @@ const app=readFileSync(
   "utf8"
 );
 
-test("Sparks is exposed as a governed project workspace",()=>{
-  assert.match(app,/label:"Sparks"/);
+test("Experiments retains the project-scoped Sparks utility",()=>{
+  assert.match(app,/key:"sparks",label:"Experiments"/);
   assert.match(app,/view==="sparks"/);
   assert.match(workspace,/SPARKS · INTERNAL UTILITY/);
   assert.match(workspace,/Earned contribution utility, not money/);

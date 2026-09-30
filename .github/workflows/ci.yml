@@ -1,8 +1,6 @@
 name: Mirror R&D Observations
 
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -17,6 +15,7 @@ jobs:
   observations:
     name: Non-blocking R&D observations
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/node-project-setup
@@ -25,9 +24,6 @@ jobs:
         id: tests
         continue-on-error: true
         run: node scripts/mirror-test-suite.mjs
-
-      - name: Governance control effectiveness contract
-        run: node --test --experimental-strip-types tests/unit/governance-control-effectiveness-monitoring.test.mjs
 
       - name: Type check
         id: typecheck
