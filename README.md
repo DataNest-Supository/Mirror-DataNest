@@ -1,27 +1,30 @@
-# MIRROR-DATANEST — R&D + PRODUCTION-PARITY TEST MODE
+# MIRROR-DATANEST — RESONANCE OWNER R&D WORKSPACE
 
-> **Ungated development and production-parity candidate testing; no canonical production authority.** Mirror-DataNest may deploy its own candidate UI for visual and functional testing.
+> **Single-owner development laboratory for Resonance DataNest and related products/tools.** Mirror-DataNest is intentionally separate from the governed collaborative repository and is optimized for rapid owner-led development, experimentation, testing and live candidate deployment.
 >
-> Canonical repository: `DataNest-Supository/DataNest`. Canonical release still requires Audit Optimizer evidence, governance and human approval.
+> Governed collaborative work belongs in `DataNest-Supository/DataNest`. Mirror-DataNest is not its governance authority, but it is the owner's primary R&D surface for evolving the product ecosystem.
 
 - Live candidate UI: `https://datanest-supository.github.io/Mirror-DataNest/`
-- R&D policy: [`docs/MIRROR_DATANEST_RD_MODE.md`](docs/MIRROR_DATANEST_RD_MODE.md)
+- R&D policy: [`config/mirror-rd-policy.json`](config/mirror-rd-policy.json)
 - Production handoff: [`docs/PRODUCTION_CANDIDATE_HANDOFF.md`](docs/PRODUCTION_CANDIDATE_HANDOFF.md)
 - Machine policy: [`config/mirror-rd-policy.json`](config/mirror-rd-policy.json)
 - Functional backend: **DataNest AI Staging** · `qchttpcyqlqnhvahprhz`
 
 ---
 
-**Certification rule:** every production-bound version must first be deployed and exercised here as a live Mirror candidate. The exact-SHA visual/functional evidence is then carried into the canonical repository for Audit Optimizer review, governance/human approval, and release authorization.
+**Operating rule:** Mirror-DataNest is the owner's build/test/deploy laboratory. Candidate work can be developed and deployed here without collaborative-review gates. When work is ready for governed collaboration or canonical production release, the owner selectively hands it off to `DataNest-Supository/DataNest`, where the existing governance and release controls remain authoritative.
 
 # DataNest
 
 **DataNest** is the canonical Resonance AppDev web control plane. It governs product execution intent, promotion, evidence and lifecycle state while preserving separate source, backend and delivery authorities.
 
-It combines two first-class tools:
+It provides an owner-oriented development surface for:
 
-- **UNIFI** — project orchestration, planning, Job Manifests, context, checkpoints, artifacts and audit.
-- **TranScheduler** — capability-aware scheduling, dependencies, reservations, retry/backoff, execution history and human controls.
+- rapid product/tool prototyping and UI evolution
+- DataNest AI experimentation and test workflows
+- live candidate deployment and visual/functional inspection
+- product portfolio development across Resonance tools
+- selective handoff of mature work into governed DataNest
 
 ## Canonical public identity
 
@@ -90,9 +93,9 @@ DataNest integrates with **RONSAS (Resonance Open Nova Sovereign Application Sui
 
 ## Web UI
 
-The UI includes authenticated access, an overview dashboard, UNIFI Job Manifest planning, TranScheduler queue controls, capability registry, run history, checkpoints, audit history, a Transparency audit library, scheduler settings, responsive navigation, deployment health checks and governed Products.
+The UI is being evolved around a single-owner R&D workflow: development cockpit, product/tool portfolio, AI experimentation, live candidate controls, runtime/health inspection, test evidence, deployment surfaces and owner settings. Shared-team administration, contributor workflows and collaborative approval UX are not the primary interaction model here.
 
-The sign-in screen intentionally does not create Supabase Auth users. Create authorized users through Supabase Auth administration, then use password or magic-link sign-in.
+The sign-in screen is owner-oriented and preloads `iace1236912@gmail.com`. The UI accepts only a session for that owner account; it does not create users. Password or magic-link sign-in can be used, subject to the configured Supabase Auth account.
 
 ## External Audit & Optimizer production status
 
