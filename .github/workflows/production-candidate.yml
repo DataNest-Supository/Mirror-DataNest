@@ -84,11 +84,11 @@ jobs:
           mkdir -p "$out"
 
           # Mirror-only control-plane files are deliberately excluded from canonical promotion.
-          git diff --binary "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)README.md'             > "$out/candidate.patch"
+          git diff --binary "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)scripts/mirror-test-suite.mjs'             ':(exclude)README.md'             > "$out/candidate.patch"
 
-          git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)README.md'             > "$out/changed-files.txt"
+          git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)scripts/mirror-test-suite.mjs'             ':(exclude)README.md'             > "$out/changed-files.txt"
 
-          git diff --stat "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)README.md'             > "$out/diff-stat.txt"
+          git diff --stat "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)scripts/mirror-test-suite.mjs'             ':(exclude)README.md'             > "$out/diff-stat.txt"
 
           if [ ! -s "$out/candidate.patch" ]; then
             echo "::error::No promotable production changes remain after Mirror-only files are excluded."
