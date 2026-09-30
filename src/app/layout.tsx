@@ -50,7 +50,7 @@ export const metadata = {
 export default function RootLayout({children}:{children:ReactNode}) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   const forceHttpsSource=basePath + "/force-https.js";
-  const runtimeConfigSource=basePath + "/runtime-config.js";
+  const releaseSha = process.env.DATANEST_UI_RELEASE_SHA ?? process.env.GITHUB_SHA ?? "";\n  const runtimeConfigSource=basePath + "/runtime-config.js" + (releaseSha ? `?v=${releaseSha.slice(0,12)}` : "");
   const fontVariables=[
     interTight.variable,
     inter.variable,
