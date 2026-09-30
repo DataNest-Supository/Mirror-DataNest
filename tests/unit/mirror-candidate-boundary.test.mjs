@@ -17,7 +17,8 @@ test("production patch keeps application changes and omits all Mirror control fi
     "docs/PRODUCTION_CANDIDATE_HANDOFF.md", "docs/reviews/mirror-20260930.md",
     "scripts/mirror-test-suite.mjs", "scripts/validate-mirror-artifact.mjs",
     "scripts/lib/mirror-release-validation.mjs", "tests/unit/mirror-release-validation.test.mjs",
-    "tests/browser/mirror-rd-live.spec.ts", "supabase/staging-migrations/example.sql", "README.md"
+    "tests/browser/mirror-rd-live.spec.ts", "supabase/staging-migrations/example.sql", "public/.well-known/reson8-app.json",
+    "src/lib/reson8.ts", "README.md"
   ];
   try {
     git("init", "--quiet");

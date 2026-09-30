@@ -14,5 +14,7 @@ export const candidatePathspec = Object.freeze([
   ":(exclude)tests/unit/mirror-*.test.mjs",
   ":(exclude)tests/browser/mirror-*.spec.ts",
   ":(exclude)supabase/staging-migrations",
+  ":(exclude)public/.well-known/reson8-app.json",
+  ":(exclude)src/lib/reson8.ts",
   ":(exclude)README.md"
 ]);
