@@ -3,10 +3,13 @@
 > **Ungated experimental clone.** This repository is not the production authority. Canonical production remains `DataNest-Supository/DataNest`. Changes are promoted only through a canonical pull request requiring human-reviewer approval.
 
 - R&D policy: [`docs/MIRROR_DATANEST_RD_MODE.md`](docs/MIRROR_DATANEST_RD_MODE.md)
+- Production handoff: [`docs/PRODUCTION_CANDIDATE_HANDOFF.md`](docs/PRODUCTION_CANDIDATE_HANDOFF.md)
 - Machine policy: [`config/mirror-rd-policy.json`](config/mirror-rd-policy.json)
 - Intended preview: `https://datanest-supository.github.io/Mirror-DataNest/`
 
 ---
+
+**Production rule:** All production-bound changes must return to `DataNest-Supository/DataNest` as a production candidate for Audit Optimizer review, governance/human approval, and live deployment from the canonical repository only.
 
 # DataNest
 
