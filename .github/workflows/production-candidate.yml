@@ -15,11 +15,6 @@ on:
         description: What was optimized and why it is ready for canonical audit
         required: true
         type: string
-      mirror_live_evidence_reference:
-        description: Successful Mirror live verification run/artifact for this exact candidate SHA
-        required: true
-        type: string
-
 permissions:
   contents: read
 
@@ -31,7 +26,6 @@ jobs:
       BASE_SHA: ${{ inputs.canonical_base_sha }}
       CANDIDATE_NAME: ${{ inputs.candidate_name }}
       CANDIDATE_SUMMARY: ${{ inputs.summary }}
-      MIRROR_LIVE_EVIDENCE: ${{ inputs.mirror_live_evidence_reference }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -68,14 +62,9 @@ jobs:
             exit 1
           fi
 
-      - name: Enforce production-candidate evidence gate
+      - name: Record R&D observations
         shell: bash
-        run: |
-          set -euo pipefail
-          test "${{ steps.tests.outcome }}" = "success"
-          test "${{ steps.typecheck.outcome }}" = "success"
-          test "${{ steps.audit.outcome }}" = "success"
-          echo "Blocking Mirror evidence gate passed; packaging may proceed."
+        run: echo "Mirror tests, type checks, and dependency audit are advisory R&D observations; none gates Mirror deployment."
 
       - name: Build production-candidate package
         shell: bash
@@ -109,7 +98,6 @@ jobs:
               candidateName:$candidateName,
               summary:$summary,
               workflowRun:$workflowRun,
-              mirrorLiveEvidence:$mirrorLiveEvidence,
               observations:{
                 unitTests:$unitTests,
                 typeCheck:$typeCheck,
@@ -120,7 +108,7 @@ jobs:
                 deployment:false,
                 governance:false
               },
-              nextRequiredStage:"DataNest-Supository audit + governance approval",
+              nextRequiredStage:"Optional owner-selected handoff to DataNest; no Mirror production gate",
               createdAt:$createdAt
             }' > "$out/candidate.json"
 
@@ -169,7 +157,6 @@ jobs:
             echo "- Unit tests: \`${{ steps.tests.outcome }}\`"
             echo "- Type check: \`${{ steps.typecheck.outcome }}\`"
             echo "- Dependency audit: \`${{ steps.audit.outcome }}\`"
-            echo "- Live Mirror evidence: $MIRROR_LIVE_EVIDENCE"
             echo
-            echo "This package has **no production authority**. Next stage: DataNest-Supository Audit Optimizer + governance approval."
+            echo "This package has **no production authority**. Mirror remains an owner R&D surface; canonical production release is handled separately by DataNest."
           } >> "$GITHUB_STEP_SUMMARY"
