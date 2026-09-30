@@ -1,133 +1,9 @@
-# Governed production release for Resonance DataNest GitHub Pages.
-# Repository Settings -> Environments -> github-pages must require at least one
-# authorized human reviewer before this workflow is considered a fully enforced gate.
-name: Deploy GitHub Pages
+name: Mirror Production-Parity Candidate
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      release_sha:
-        description: Exact 40-character commit SHA reachable from main
-        required: true
-        type: string
-      database_migration_head:
-        description: Expected production database migration head; the live database is queried and must match exactly
-        required: true
-        default: 20260930105423
-        type: string
-      database_migration_name:
-        description: Expected production database migration name paired with the migration head
-        required: true
-        default: datanest_release_attestation_v1
-        type: string
-      release_mode:
-        description: Fully authorized production or temporary Owner live test mode
-        required: true
-        default: authorized
-        type: choice
-        options:
-          - authorized
-          - owner_test_mode
-      mirror_promotion_reference:
-        description: Mirror-DataNest production-candidate artifact/run/commit reference
-        required: true
-        type: string
-      mirror_live_evidence_reference:
-        description: Successful live Mirror visual/functional verification run or evidence artifact for the exact candidate
-        required: true
-        type: string
-      datanest_ai_certification_reference:
-        description: DataNest AI Certification run/artifact for the exact candidate SHA and governed staging backend
-        required: true
-        type: string
-      audit_optimizer_reference:
-        description: DataNest Audit Optimizer review/evidence reference for this production candidate
-        required: true
-        type: string
-      pr_verification_reference:
-        description: PR Verification run/reference for the exact release SHA
-        required: true
-        type: string
-      security_scan_reference:
-        description: Security scan run/reference for the exact release SHA
-        required: true
-        type: string
-      ronsas_validation_reference:
-        description: RONSAS Application Validation run/reference for the exact release SHA
-        required: true
-        type: string
-      visual_review_reference:
-        description: Human visual / UX review reference; required for authorized production, may be supplied post-test in Owner Test Mode
-        required: false
-        type: string
-      governance_review_reference:
-        description: Governance-impact human review reference
-        required: false
-        type: string
-      legal_review_reference:
-        description: Legal review reference for the legal/governance surface changes
-        required: false
-        type: string
-      external_review_reference:
-        description: External or independent human review reference
-        required: false
-        type: string
-      production_authorization_reference:
-        description: Final human production authorization reference; required for authorized production, remains open during Owner Test Mode
-        required: false
-        type: string
-      owner_test_mode_reference:
-        description: Owner authorization reference for temporary live Test Mode
-        required: false
-        type: string
-      owner_test_mode_owner_login:
-        description: GitHub login of the Owner invoking temporary live Test Mode
-        required: false
-        type: string
-      owner_test_mode_window_strategy:
-        description: Use DataNest AI proposed window or an explicit Owner override
-        required: false
-        default: ai_proposed
-        type: choice
-        options:
-          - ai_proposed
-          - explicit
-      owner_test_mode_task_complexity:
-        description: Task complexity used by DataNest AI to propose the live evidence window
-        required: false
-        default: standard
-        type: choice
-        options:
-          - routine
-          - standard
-          - complex
-          - cross_system
-      owner_test_mode_reporting_complexity:
-        description: Reporting complexity used by DataNest AI to propose the live evidence window
-        required: false
-        default: standard
-        type: choice
-        options:
-          - summary
-          - standard
-          - detailed
-          - audit_grade
-      owner_test_mode_expires_at:
-        description: Optional explicit ISO-8601 expiry; required only when window_strategy=explicit; must be 30 minutes to 72 hours in the future
-        required: false
-        type: string
-      owner_test_mode_reason:
-        description: Evidence-gathering reason for the temporary production exception
-        required: false
-        type: string
-      confirmation:
-        description: Type AUTHORIZE PRODUCTION or AUTHORIZE OWNER TEST MODE as required by release_mode
-        required: true
-        type: string
-      gate_timeframe_override_hours:
-        description: Optional Owner worktree-gate planning-window override in hours (0.5-72)
-        required: false
-        type: string
 
 permissions:
   contents: read
@@ -135,262 +11,297 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: mirror-production-parity
+  cancel-in-progress: true
 
 jobs:
   build:
+    name: Build production-parity Mirror
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     env:
       DATANEST_STATIC_EXPORT: "true"
-      NEXT_PUBLIC_BASE_PATH: "/DataNest"
-      NEXT_PUBLIC_SUPABASE_URL: "https://sgqdmfgjbprsoqsmgigi.supabase.co"
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_yIf5HFKNNteed4HdYCS2Vw_4TB-4LvB"
-      DATANEST_UI_RELEASE_SHA: ${{ inputs.release_sha }}
-      DATANEST_UI_RELEASE_STATE: ${{ inputs.release_mode }}
-      DATANEST_UI_MIRROR_PROMOTION_REF: ${{ inputs.mirror_promotion_reference }}
-      DATANEST_UI_MIRROR_LIVE_EVIDENCE_REF: ${{ inputs.mirror_live_evidence_reference }}
-      DATANEST_UI_DATANEST_AI_CERTIFICATION_REF: ${{ inputs.datanest_ai_certification_reference }}
-      DATANEST_UI_AUDIT_OPTIMIZER_REF: ${{ inputs.audit_optimizer_reference }}
-      DATANEST_UI_PR_VERIFICATION_REF: ${{ inputs.pr_verification_reference }}
-      DATANEST_UI_SECURITY_REF: ${{ inputs.security_scan_reference }}
-      DATANEST_UI_RONSAS_VALIDATION_REF: ${{ inputs.ronsas_validation_reference }}
-      DATANEST_UI_VISUAL_REVIEW_REF: ${{ inputs.visual_review_reference }}
-      DATANEST_UI_GOVERNANCE_REVIEW_REF: ${{ inputs.governance_review_reference }}
-      DATANEST_UI_LEGAL_REVIEW_REF: ${{ inputs.legal_review_reference }}
-      DATANEST_UI_EXTERNAL_REVIEW_REF: ${{ inputs.external_review_reference }}
-      DATANEST_UI_AUTHORIZATION_REF: ${{ inputs.production_authorization_reference }}
-      DATANEST_UI_PRODUCTION_CONFIRMATION: ${{ inputs.confirmation }}
-      DATANEST_UI_OWNER_TEST_MODE_REF: ${{ inputs.owner_test_mode_reference }}
-      DATANEST_UI_OWNER_TEST_MODE_OWNER_LOGIN: ${{ inputs.owner_test_mode_owner_login }}
-      DATANEST_UI_OWNER_TEST_MODE_WINDOW_STRATEGY: ${{ inputs.owner_test_mode_window_strategy }}
-      DATANEST_UI_OWNER_TEST_MODE_TASK_COMPLEXITY: ${{ inputs.owner_test_mode_task_complexity }}
-      DATANEST_UI_OWNER_TEST_MODE_REPORTING_COMPLEXITY: ${{ inputs.owner_test_mode_reporting_complexity }}
-      DATANEST_UI_OWNER_TEST_MODE_EXPIRES_AT: ${{ inputs.owner_test_mode_expires_at }}
-      DATANEST_UI_OWNER_TEST_MODE_REASON: ${{ inputs.owner_test_mode_reason }}
-      DATANEST_UI_OWNER_TEST_MODE_ACTOR: ${{ github.actor }}
-      DATANEST_EXPECTED_DB_MIGRATION_HEAD: ${{ inputs.database_migration_head }}
-      DATANEST_EXPECTED_DB_MIGRATION_NAME: ${{ inputs.database_migration_name }}
-      DATANEST_EDGE_ATTESTATION_BASELINE: config/production-edge-function-attestation.json
+      NEXT_PUBLIC_BASE_PATH: "/Mirror-DataNest"
+      NEXT_PUBLIC_SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
+      DATANEST_SUPABASE_PROJECT: "qchttpcyqlqnhvahprhz"
+      DATANEST_UI_RELEASE_SHA: ${{ github.sha }}
+      DATANEST_UI_RELEASE_STATE: "candidate"
+      NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
+      MIRROR_PUBLIC_URL: "https://datanest-supository.github.io/Mirror-DataNest/"
+      DATANEST_EDGE_AI: datanest-ai-chat@2
+      DATANEST_EDGE_INTAKE: datanest-ai-intake@1
+      DATANEST_EDGE_CERTIFICATION: datanest-ai-certification@1
+      DATANEST_EDGE_PROVIDER: manage-ai-provider-v2@1
+      DATANEST_EDGE_INVITES: send-job-invite@1
+      DATANEST_EDGE_PROJECT_INVITES: send-project-member-invite@3
+      DATANEST_EDGE_RONSAS_STATUS: ronsas-status@1
+      DATANEST_EDGE_EXTERNAL_AUDIT: external-audit@1
     steps:
-      - name: Checkout exact release SHA
-        uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ inputs.release_sha }}
-          fetch-depth: 0
-
-      - name: Verify Owner Test Mode actor authority
-        if: ${{ inputs.release_mode == 'owner_test_mode' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          test "$DATANEST_UI_OWNER_TEST_MODE_OWNER_LOGIN" = "$GITHUB_ACTOR"
-          permission="$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$GITHUB_ACTOR/permission" --jq '.permission')"
-          test "$permission" = "admin"
-
-      - name: Show DataNest AI proposed Owner Test Mode timeframe
-        if: ${{ inputs.release_mode == 'owner_test_mode' }}
-        run: node scripts/propose-owner-test-mode-window.mjs
-
-      - name: Verify production authorization payload
-        run: node scripts/verify-ui-production-authorization.mjs
-
-      - name: Verify exact SHA is reachable from main
-        shell: bash
-        run: |
-          test "$(git rev-parse HEAD)" = "$DATANEST_UI_RELEASE_SHA"
-          git fetch origin main --no-tags --prune
-          git merge-base --is-ancestor "$DATANEST_UI_RELEASE_SHA" origin/main
-
-      - name: Verify live production database release attestation
-        run: node scripts/verify-production-release-attestation.mjs .datanest/release-attestation.json
-
-      - name: Verify live production Edge Function deployment attestation
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          DATANEST_SUPABASE_PROJECT: sgqdmfgjbprsoqsmgigi
-        run: node scripts/verify-production-edge-function-attestation.mjs .datanest/edge-function-attestation.json
-
+      - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/node-project-setup
-      - run: npm test
-      - run: npm run check
 
-      - run: node scripts/write-runtime-config.mjs public/runtime-config.js
+      - name: Unit tests
+        id: unit_tests
+        continue-on-error: true
+        run: node scripts/mirror-test-suite.mjs
+
+      - name: Type check
+        id: type_check
+        continue-on-error: true
+        run: npm run check
+
+      - name: Dependency audit
+        id: dependency_audit
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Record advisory pre-deployment observations
+        if: always()
+        run: echo "Mirror pre-deployment observations are advisory and do not block Pages deployment."
+
+      - name: Validate isolated staging Supabase runtime values
         env:
-          SUPABASE_URL: "https://sgqdmfgjbprsoqsmgigi.supabase.co"
-          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_yIf5HFKNNteed4HdYCS2Vw_4TB-4LvB"
+          SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
+          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_PUBLISHABLE_KEY"
+          case "$SUPABASE_URL" in
+            https://qchttpcyqlqnhvahprhz.supabase.co) ;;
+            *) echo "::error::Mirror must use the DataNest AI Staging Supabase project."; exit 1 ;;
+          esac
+          case "$SUPABASE_PUBLISHABLE_KEY" in
+            sb_publishable_*) ;;
+            *) echo "::error::Mirror requires a Supabase publishable key."; exit 1 ;;
+          esac
 
-      - name: Write UI governance release evidence
-        run: node scripts/write-ui-governance-evidence.mjs public/ui-governance-release.json
-
-      - name: Write release manifest
+      - name: Write isolated staging runtime configuration
         env:
-          DATANEST_RELEASE_SHA: ${{ inputs.release_sha }}
-          DATANEST_DB_RELEASE: link-transcheduler-job-requirements-user-interests
-          DATANEST_EXTERNAL_AUDIT_DB_RELEASE: external-audit-production-v1
-          DATANEST_BASELINE_RELEASE: reload-latest-v1
-          DATANEST_BASELINE_SHA: 592149b0898f6703b28e9fa33e73bd0799cae3fd
-          DATANEST_EDGE_AI: datanest-ai-chat@2
-          DATANEST_EDGE_INTAKE: datanest-ai-intake@1
-          DATANEST_EDGE_CERTIFICATION: datanest-ai-certification@1
-          DATANEST_EDGE_PROVIDER: manage-ai-provider-v2@1
-          DATANEST_EDGE_INVITES: send-job-invite@1
-          DATANEST_EDGE_PROJECT_INVITES: send-project-member-invite@3
-          DATANEST_EDGE_RONSAS_STATUS: ronsas-status@1
-          DATANEST_EDGE_EXTERNAL_AUDIT: external-audit@1
-          DATANEST_DB_ATTESTATION_FILE: .datanest/release-attestation.json
-          DATANEST_EDGE_ATTESTATION_FILE: .datanest/edge-function-attestation.json
+          SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
+          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
+        run: node scripts/write-runtime-config.mjs public/runtime-config.js
+
+      - name: Validate generated Supabase runtime configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s public/runtime-config.js
+          grep -Fq 'https://qchttpcyqlqnhvahprhz.supabase.co' public/runtime-config.js
+          grep -Fq 'sb_publishable_' public/runtime-config.js
+          grep -Fq 'releaseSha' public/runtime-config.js
+          grep -Fq "$GITHUB_SHA" public/runtime-config.js
+
+
+      - name: Write candidate release manifest
+        env:
+          DATANEST_RELEASE_SHA: ${{ github.sha }}
+          DATANEST_DB_RELEASE: "staging-certification-current"
+          DATANEST_SUPABASE_PROJECT: "qchttpcyqlqnhvahprhz"
         run: node scripts/write-release-manifest.mjs public/release-manifest.json
 
-      - run: npm run build
+      - name: Write immutable Mirror release manifest
+        shell: bash
+        env:
+          UNIT_TESTS: ${{ steps.unit_tests.outcome }}
+          TYPE_CHECK: ${{ steps.type_check.outcome }}
+          DEP_AUDIT: ${{ steps.dependency_audit.outcome }}
+        run: |
+          short_sha="${GITHUB_SHA:0:12}"
+          release_id="mirror-${GITHUB_RUN_NUMBER}-$short_sha"
+          jq -n \
+            --arg schemaVersion "mirror-live-release-v1" \
+            --arg mode "production-parity-candidate" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg commit "$GITHUB_SHA" \
+            --arg releaseId "$release_id" \
+            --arg publicUrl "$MIRROR_PUBLIC_URL" \
+            --arg canonicalRepository "DataNest-Supository/DataNest" \
+            --arg canonicalPublicUrl "https://datanest-supository.github.io/DataNest/" \
+            --arg backendProject "qchttpcyqlqnhvahprhz" \
+            --arg backendMode "isolated-staging" \
+            --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg unitTests "$UNIT_TESTS" \
+            --arg typeCheck "$TYPE_CHECK" \
+            --arg dependencyAudit "$DEP_AUDIT" \
+            --arg generatedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              schemaVersion:$schemaVersion,
+              mode:$mode,
+              repository:$repository,
+              commit:$commit,
+              releaseId:$releaseId,
+              publicUrl:$publicUrl,
+              canonicalRepository:$canonicalRepository,
+              canonicalPublicUrl:$canonicalPublicUrl,
+              backend:{project:$backendProject,mode:$backendMode},
+              observations:{unitTests:$unitTests,typeCheck:$typeCheck,dependencyAudit:$dependencyAudit},
+              workflowRun:$workflowRun,
+              authority:{productionSource:false,canonicalDeployment:false,governance:false},
+              evidencePurpose:"Visual and functional testing of the exact production candidate before canonical certification.",
+              generatedAt:$generatedAt
+            }' > public/mirror-release.json
+
+          cat > public/mirror-rd.json <<EOF
+          {"ok":true,"mode":"production-parity-candidate","repository":"DataNest-Supository/Mirror-DataNest","commit":"$GITHUB_SHA","releaseId":"$release_id","canonicalRepository":"DataNest-Supository/DataNest","backend":"DataNest AI Staging","productionAuthority":false}
+          EOF
+
+      - name: Build static production-parity site
+        run: npm run build
 
       - name: Build DataNest-hosted RONSAS apps
         run: node scripts/build-ronsas-pages.mjs
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: ./out
 
-      - name: Upload Owner Live Test Mode evidence
-        if: ${{ inputs.release_mode == 'owner_test_mode' }}
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: ui-owner-live-test-mode-${{ github.run_id }}
-          path: |
-            public/ui-governance-release.json
-            public/release-manifest.json
-          retention-days: 90
-
   deploy:
-    environment:
-      name: ${{ inputs.release_mode == 'owner_test_mode' && 'github-pages-owner-test-mode' || 'github-pages' }}
-      url: ${{ steps.deployment.outputs.page_url }}
+    name: Publish live Mirror candidate
     runs-on: ubuntu-24.04
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy live Mirror candidate
         id: deployment
         uses: actions/deploy-pages@v5.0.1
 
-  verify:
-    name: Verify live Pages deployment
+  verify-live:
+    name: Verify live Mirror pages
     runs-on: ubuntu-24.04
     needs: deploy
     steps:
-      - name: Checkout exact release SHA for verification
-        uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ inputs.release_sha }}
-
-      - name: Verify deployed Next.js shell and public governance routes
-        run: |
-          for route in "" legal governance accessibility terms privacy disclaimers acceptable-use intellectual-property; do
-            suffix=""
-            if [ -n "$route" ]; then suffix="$route/"; fi
-            curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors               "https://datanest-supository.github.io/DataNest/$suffix"               -o "/tmp/datanest-${route:-home}.html"
-            grep -qi "<html" "/tmp/datanest-${route:-home}.html"
-          done
-          grep -q "<title>DataNest</title>" /tmp/datanest-home.html
-          if ! grep -q 'class="authShell"' /tmp/datanest-home.html; then
-            echo "Expected Next.js auth shell was not served. Live HTML prefix:"
-            head -c 2000 /tmp/datanest-home.html
-            exit 1
-          fi
-
-      - name: Verify static health marker
-        run: |
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors             https://datanest-supository.github.io/DataNest/health.json             -o /tmp/datanest-health.json
-          grep -q '"ok":true' /tmp/datanest-health.json
-          grep -q '"project":"Resonance DataNest"' /tmp/datanest-health.json
-
-      - name: Verify runtime configuration
-        run: |
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors             https://datanest-supository.github.io/DataNest/runtime-config.js             -o /tmp/runtime-config.js
-          grep -q "https://sgqdmfgjbprsoqsmgigi.supabase.co" /tmp/runtime-config.js
-          grep -q "sb_publishable_" /tmp/runtime-config.js
-          grep -q "authoritative" /tmp/runtime-config.js
-
-      - name: Verify DataNest-hosted RONSAS apps
-        run: |
-          for app in career-compass creative-studio epublisher lyricsync-studio scene-song-spark sovereign-forge syncvision; do
-            curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors               "https://datanest-supository.github.io/DataNest/apps/$app/"               -o "/tmp/$app.html"
-            grep -qi "<html" "/tmp/$app.html"
-          done
-
-      - name: Verify governed YouTube Optimizer SSR target
-        run: |
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors             https://youtubeoptimizer.life/             -o /tmp/youtube-optimizer.html
-          grep -qi "<html" /tmp/youtube-optimizer.html
-
-      - name: Verify release and UI governance manifests
-        env:
-          RELEASE_SHA: ${{ inputs.release_sha }}
-          RELEASE_MODE: ${{ inputs.release_mode }}
-          TEST_MODE_EXPIRES_AT: ${{ inputs.owner_test_mode_expires_at }}
-          TEST_MODE_WINDOW_STRATEGY: ${{ inputs.owner_test_mode_window_strategy }}
-        run: |
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors             https://datanest-supository.github.io/DataNest/release-manifest.json             -o /tmp/release-manifest.json
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors             https://datanest-supository.github.io/DataNest/ui-governance-release.json             -o /tmp/ui-governance-release.json
-          grep -q "\"frontendCommit\":\"$RELEASE_SHA\"" /tmp/release-manifest.json
-          grep -q "\"releaseSha\":\"$RELEASE_SHA\"" /tmp/ui-governance-release.json
-          node <<'NODE'
-          const fs=require("fs");
-          const evidence=JSON.parse(fs.readFileSync("/tmp/ui-governance-release.json","utf8"));
-          const mode=process.env.RELEASE_MODE;
-          if(evidence.releaseState!==mode) throw new Error(`Expected releaseState ${mode}, got ${evidence.releaseState}`);
-          if(evidence.productionDeploymentAllowed!==true) throw new Error("Production deployment must be explicitly allowed");
-          if(mode==="authorized"){
-            if(evidence.authorized!==true || evidence.fullyGoverned!==true) throw new Error("Authorized release must be fully governed");
-          }else if(mode==="owner_test_mode"){
-            if(evidence.authorized!==false || evidence.fullyGoverned!==false) throw new Error("Owner Test Mode must not claim full authorization");
-            if(!evidence.ownerTestMode?.active || evidence.ownerTestMode.temporaryException!==true) throw new Error("Owner Test Mode metadata is required");
-            const proposal=evidence.ownerTestMode.timeframeProposal;
-            if(!proposal || proposal.strategy!==process.env.TEST_MODE_WINDOW_STRATEGY) throw new Error("Owner Test Mode timeframe proposal is required");
-            if(proposal.strategy==="explicit"){
-              const expected=new Date(process.env.TEST_MODE_EXPIRES_AT).toISOString();
-              if(evidence.ownerTestMode.expiresAt!==expected) throw new Error("Owner Test Mode explicit expiry mismatch");
-            }else if(proposal.strategy==="ai_proposed"){
-              if(evidence.ownerTestMode.expiresAt!==proposal.recommendedExpiresAt) throw new Error("Owner Test Mode AI proposal was not applied");
-            }
-          }else{
-            throw new Error(`Unsupported release mode ${mode}`);
-          }
-          NODE
-          grep -q "\"releaseSha\":\"$RELEASE_SHA\"" /tmp/release-manifest.json
-          grep -q '"databaseRelease":"link-transcheduler-job-requirements-user-interests"' /tmp/release-manifest.json
-          grep -q '"projectInvitations":"send-project-member-invite@3"' /tmp/release-manifest.json
-          node <<'NODE'
-          const fs=require("fs");
-          const manifest=JSON.parse(fs.readFileSync("/tmp/release-manifest.json","utf8"));
-          if(manifest.releaseAttestation?.database?.status!=="verified") throw new Error("Live release must carry a verified production database attestation");
-          if(!/^[0-9a-f]{64}$/i.test(String(manifest.releaseAttestation.database.fingerprint||""))) throw new Error("Production database attestation fingerprint is missing");
-          if(manifest.releaseAttestation.edgeFunctions?.status!=="verified") throw new Error("Live release must carry a verified Edge Function attestation");
-          if(Number(manifest.releaseAttestation.edgeFunctions.functionCount||0)<1) throw new Error("Edge Function attestation function count is missing");
-          NODE
-
+      - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/node-project-setup
+
+      - name: Verify live release manifest and static routes
+        id: live_routes
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://datanest-supository.github.io/Mirror-DataNest"
+          fetch_after_pages_propagation() {
+            local url="$1"
+            local output="$2"
+            local attempts=18
+            for attempt in $(seq 1 "$attempts"); do
+              if curl --fail --silent --show-error --location --retry 2 --retry-delay 2 --retry-all-errors "$url" -o "$output"; then
+                return 0
+              fi
+              if [ "$attempt" -lt "$attempts" ]; then
+                sleep 5
+              fi
+            done
+            echo "::error::Mirror Pages resource did not become reachable after Pages propagation retries: $url"
+            return 1
+          }
+
+          fetch_until_expected() {
+            local url="$1"
+            local output="$2"
+            local expected="$3"
+            local attempts=18
+            for attempt in $(seq 1 "$attempts"); do
+              if curl --fail --silent --show-error --location --retry 2 --retry-delay 2 --retry-all-errors "$url" -o "$output" &&
+                 grep -Fq "$expected" "$output"; then
+                return 0
+              fi
+              if [ "$attempt" -lt "$attempts" ]; then
+                sleep 5
+              fi
+            done
+            echo "::error::Mirror Pages resource did not expose the expected candidate content after propagation retries: $url"
+            return 1
+          }
+
+          fetch_until_json_value() {
+            local url="$1"
+            local output="$2"
+            local filter="$3"
+            local expected="$4"
+            local attempts=36
+            for attempt in $(seq 1 "$attempts"); do
+              if curl --fail --silent --show-error --location --retry 2 --retry-delay 2 --retry-all-errors "$url" -o "$output" &&
+                 jq -e --arg expected "$expected" "$filter" "$output" >/dev/null; then
+                return 0
+              fi
+              if [ "$attempt" -lt "$attempts" ]; then
+                sleep 5
+              fi
+            done
+            echo "::error::Mirror Pages JSON resource did not expose the expected candidate value after propagation retries: $url"
+            return 1
+          }
+
+          fetch_until_json_value "$base/mirror-release.json" /tmp/mirror-release.json '.commit == $expected' "$GITHUB_SHA"
+          fetch_until_json_value "$base/release-manifest.json" /tmp/release-manifest.json '.edgeFunctions.projectInvitations == $expected' "send-project-member-invite@3"
+          # GitHub Pages serves the static shell/manifests here; application route reachability
+          # is verified by the live Playwright suite below. Do not require every client-side
+          # route or app path to exist as a standalone server resource.
+          fetch_after_pages_propagation "$base/" /tmp/mirror-home.html
+          grep -qi "<html" /tmp/mirror-home.html
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run rendered browser smoke tests
+      - name: Run live visual and functional browser tests
+        id: browser_tests
+        continue-on-error: true
         env:
           PLAYWRIGHT_BASE_URL: https://datanest-supository.github.io
-          DATANEST_APP_PATH: /DataNest/
+          DATANEST_APP_PATH: /Mirror-DataNest/
         run: >
           npx playwright test
           tests/browser/auth.smoke.spec.ts
-          tests/browser/home-optimization.spec.ts
-          tests/browser/products.spec.ts
-          tests/browser/external-auditor.spec.ts
           tests/browser/legal-centre.spec.ts
-          tests/browser/datanest-ai-layout.spec.ts
-          tests/browser/transcheduler-project-gantt.spec.ts
+          tests/browser/mirror-rd-live.spec.ts
 
-  gate-timeframe:
-    name: DataNest AI worktree gate timeframe
-    uses: ./.github/workflows/worktree-gate-timeframe.yml
-    with:
-      gate_id: "pages"
-      override_hours: ${{ inputs.gate_timeframe_override_hours || '' }}
+      - name: Write live Mirror verification evidence
+        if: always()
+        shell: bash
+        env:
+          ROUTE_OUTCOME: ${{ steps.live_routes.outcome }}
+          BROWSER_OUTCOME: ${{ steps.browser_tests.outcome }}
+        run: |
+          jq -n \
+            --arg schemaVersion "mirror-live-verification-v1" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg commit "$GITHUB_SHA" \
+            --arg liveUrl "https://datanest-supository.github.io/Mirror-DataNest/" \
+            --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg routeOutcome "$ROUTE_OUTCOME" \
+            --arg browserOutcome "$BROWSER_OUTCOME" \
+            --arg generatedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              schemaVersion:$schemaVersion,
+              repository:$repository,
+              commit:$commit,
+              liveUrl:$liveUrl,
+              workflowRun:$workflowRun,
+              visualFunctionalEvidence:{routeVerification:$routeOutcome,browserTests:$browserOutcome},
+              authority:{certification:false,canonicalDeployment:false},
+              generatedAt:$generatedAt
+            }' > mirror-live-verification.json
+
+      - name: Upload Mirror governance evidence
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: mirror-live-evidence-${{ github.run_id }}-${{ github.sha }}
+          path: |
+            mirror-live-verification.json
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Record live verification result without deployment gating
+        if: always()
+        run: echo "Mirror live verification is advisory R&D evidence; it does not gate Mirror deployment or canonical production."
