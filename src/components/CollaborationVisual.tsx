@@ -238,7 +238,7 @@ export default function CollaborationVisual({
       </button>
     </div>
 
-    <span className={styles.portfolioCaption}>
+    <span className={styles.portfolioCaption} aria-live="polite">
       {loading
         ?"Live catalog sync"
         :error
