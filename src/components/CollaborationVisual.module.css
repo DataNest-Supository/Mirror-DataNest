@@ -454,3 +454,20 @@
     animation:none!important;
   }
 }
+
+
+/* User-controlled motion pause complements prefers-reduced-motion. */
+:global(html[data-motion-paused="true"]) .portfolioRingOuter,
+:global(html[data-motion-paused="true"]) .portfolioRingInner,
+:global(html[data-motion-paused="true"]) .portfolioSignalSweep,
+:global(html[data-motion-paused="true"]) .portfolioSignalDot,
+:global(html[data-motion-paused="true"]) .portfolioProductCard,
+:global(html[data-motion-paused="true"]) .portfolioCore,
+:global(html[data-motion-paused="true"]) .portfolioCore::before,
+:global(html[data-motion-paused="true"]) .intelligenceHalo,
+:global(html[data-motion-paused="true"]) .valueNode,
+:global(html[data-motion-paused="true"]) .valueSignal,
+:global(html[data-motion-paused="true"]) .aiCorePulse,
+:global(html[data-motion-paused="true"]) .ecosystemPulse {
+  animation-play-state:paused!important;
+}
