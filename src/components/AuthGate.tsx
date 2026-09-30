@@ -275,13 +275,13 @@ export default function AuthGate() {
           <h1>Set a new DataNest password</h1>
           <p className="lede">Choose a new password to finish secure account recovery or invitation setup.</p>
           <form onSubmit={submitNewPassword} className="authForm" aria-busy={busy}>
-            <label>
+            <label htmlFor="new-password">
               New password
-              <input type="password" required minLength={8} autoComplete="new-password" value={newPassword} onChange={(event) => setNewPasswordValue(event.target.value)} placeholder="At least 8 characters" />
+              <input id="new-password" type="password" required minLength={8} autoComplete="new-password" value={newPassword} onChange={(event) => setNewPasswordValue(event.target.value)} placeholder="At least 8 characters" />
             </label>
-            <label>
+            <label htmlFor="confirm-password">
               Confirm password
-              <input type="password" required minLength={8} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Re-enter your password" />
+              <input id="confirm-password" type="password" required minLength={8} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Re-enter your password" />
             </label>
             <button className="primaryButton" disabled={busy} type="submit">{busy ? "Saving…" : "Create password"}</button>
           </form>
@@ -321,7 +321,7 @@ export default function AuthGate() {
         <p className="lede">Single-owner development workspace.</p><p className="startupHint">Use your password, or choose a secure email link if you need another sign-in method.</p>
 
         <form onSubmit={signIn} className="authForm" aria-busy={busy}>
-          <label>
+          <label htmlFor="sign-in-email">
             Email
             <input
               id="sign-in-email"
@@ -334,9 +334,10 @@ export default function AuthGate() {
               placeholder="Authorized email"
             />
           </label>
-          <label>
+          <label htmlFor="sign-in-password">
             Password
             <input
+              id="sign-in-password"
               type="password"
               required
               autoComplete="current-password"
