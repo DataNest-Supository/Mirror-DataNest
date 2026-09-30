@@ -5332,3 +5332,57 @@ html[data-motion-paused="true"] .workspaceArrival,html[data-motion-paused="true"
 .datanestAiContributionEmpty{padding:18px}
 @container datanest-main (max-width:920px){.datanestAiContributionSections{grid-template-columns:repeat(2,minmax(0,1fr))}.datanestAiContributionQueue article{grid-template-columns:1fr}.datanestAiContributionImpact{justify-content:flex-start}}
 @container datanest-main (max-width:620px){.datanestAiContributionDashboard>summary,.datanestAiContributionHead{display:grid}.datanestAiContributionPulse{justify-content:flex-start}.datanestAiContributionSections{grid-template-columns:1fr}}
+/* 2026-09-30 Mirror UI/UX optimization */
+:root{--focus-ring:0 0 0 3px rgba(66,231,255,.16);--surface-hover:rgba(109,213,247,.055)}
+html{scroll-behavior:smooth}
+body{line-height:1.45}
+button,a,input,select,textarea{min-height:42px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;box-shadow:var(--focus-ring)}
+.contentPane{width:100%}
+.panel,.heroPanel,.schedulerHero,.authCard{transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.panel:hover{border-color:rgba(109,213,247,.18)}
+.panelHead h2,.panel h2,.panel h3{letter-spacing:-.02em}
+.sectionIntro p,.heroPanel p,.schedulerHero p,.muted{max-width:70ch}
+.workspaceCard{min-height:72px}
+.workspaceCard:focus-visible{transform:translateY(-1px);border-color:rgba(109,213,247,.38)}
+.rowActions{flex-wrap:wrap}
+.authShell{background:
+  radial-gradient(circle at 78% 8%,rgba(66,231,255,.10),transparent 26rem),
+  radial-gradient(circle at 18% 80%,rgba(255,54,216,.09),transparent 30rem),
+  linear-gradient(180deg,var(--surface-canvas-raised),var(--surface-canvas-deep))}
+.authCard{box-shadow:0 28px 80px rgba(0,0,0,.34),0 0 40px rgba(139,92,246,.08)}
+.authForm .primaryButton,.authForm .secondaryButton{width:100%}
+.authMessageSlot{min-height:0}
+.landingLayout{width:min(1180px,100%);gap:clamp(24px,5vw,64px)}
+.landingStory{min-width:0}
+.landingSignIn{align-self:center}
+@media(max-width:1120px){
+  .contentPane{padding-left:24px;padding-right:24px}
+  .metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workspaceGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .topbar{min-height:72px}
+  .contentPane{padding:18px 16px 44px}
+  .workspaceGrid{grid-template-columns:1fr}
+  .workspaceSectionHead{align-items:flex-start;flex-direction:column}
+  .workspaceSectionHead>p{text-align:left}
+  .heroPanel,.schedulerHero{gap:20px}
+  .navGroup button{min-height:44px}
+}
+@media(max-width:650px){
+  body{font-size:14px}
+  .authShell{padding:14px}
+  .authCard{padding:22px 18px;border-radius:18px}
+  .authCard h1{font-size:30px}
+  .heroPanel h2,.schedulerHero h2,.sectionIntro h2{font-size:30px}
+  .metricGrid{grid-template-columns:1fr}
+  .metricCard{padding:15px}
+  .panel{padding:17px}
+  .panelHead{align-items:flex-start}
+  .rowActions{width:100%}
+  .rowActions button{flex:1 1 auto}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
