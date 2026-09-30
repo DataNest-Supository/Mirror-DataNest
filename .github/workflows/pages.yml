@@ -27,14 +27,14 @@ jobs:
       DATANEST_UI_RELEASE_STATE: "candidate"
       NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
       MIRROR_PUBLIC_URL: "https://datanest-supository.github.io/Mirror-DataNest/"
-      DATANEST_EDGE_AI: "datanest-ai-chat@2"
-      DATANEST_EDGE_INTAKE: "datanest-ai-intake@1"
-      DATANEST_EDGE_CERTIFICATION: "datanest-ai-certification@1"
-      DATANEST_EDGE_PROVIDER: "manage-ai-provider-v2@1"
-      DATANEST_EDGE_INVITES: "send-job-invite@1"
-      DATANEST_EDGE_PROJECT_INVITES: "send-project-member-invite@3"
-      DATANEST_EDGE_RONSAS_STATUS: "ronsas-status@1"
-      DATANEST_EDGE_EXTERNAL_AUDIT: "external-audit@1"
+      DATANEST_EDGE_AI: datanest-ai-chat@2
+      DATANEST_EDGE_INTAKE: datanest-ai-intake@1
+      DATANEST_EDGE_CERTIFICATION: datanest-ai-certification@1
+      DATANEST_EDGE_PROVIDER: manage-ai-provider-v2@1
+      DATANEST_EDGE_INVITES: send-job-invite@1
+      DATANEST_EDGE_PROJECT_INVITES: send-project-member-invite@3
+      DATANEST_EDGE_RONSAS_STATUS: ronsas-status@1
+      DATANEST_EDGE_EXTERNAL_AUDIT: external-audit@1
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/node-project-setup
