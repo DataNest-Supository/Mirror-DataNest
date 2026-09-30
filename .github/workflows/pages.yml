@@ -22,7 +22,7 @@ jobs:
       DATANEST_STATIC_EXPORT: "true"
       NEXT_PUBLIC_BASE_PATH: "/Mirror-DataNest"
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.MIRROR_SUPABASE_URL || 'https://mirror-datanest.invalid' }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.MIRROR_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_mirror_placeholder' }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
       DATANEST_UI_RELEASE_SHA: ${{ github.sha }}
       DATANEST_UI_RELEASE_STATE: "mirror_rd_test"
       NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
@@ -41,7 +41,7 @@ jobs:
       - name: Write isolated mirror runtime configuration
         env:
           SUPABASE_URL: ${{ vars.MIRROR_SUPABASE_URL || 'https://mirror-datanest.invalid' }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ vars.MIRROR_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_mirror_placeholder' }}
+          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
         run: node scripts/write-runtime-config.mjs public/runtime-config.js
 
       - name: Write mirror identity marker
