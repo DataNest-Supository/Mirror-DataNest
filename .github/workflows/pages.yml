@@ -60,11 +60,38 @@ jobs:
         if: always()
         run: echo "Mirror pre-deployment observations are advisory and do not block Pages deployment."
 
+      - name: Validate isolated staging Supabase runtime values
+        env:
+          SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
+          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_PUBLISHABLE_KEY"
+          case "$SUPABASE_URL" in
+            https://qchttpcyqlqnhvahprhz.supabase.co) ;;
+            *) echo "::error::Mirror must use the DataNest AI Staging Supabase project."; exit 1 ;;
+          esac
+          case "$SUPABASE_PUBLISHABLE_KEY" in
+            sb_publishable_*) ;;
+            *) echo "::error::Mirror requires a Supabase publishable key."; exit 1 ;;
+          esac
+
       - name: Write isolated staging runtime configuration
         env:
           SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
           SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
         run: node scripts/write-runtime-config.mjs public/runtime-config.js
+
+      - name: Validate generated Supabase runtime configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s public/runtime-config.js
+          grep -Fq 'https://qchttpcyqlqnhvahprhz.supabase.co' public/runtime-config.js
+          grep -Fq 'sb_publishable_' public/runtime-config.js
+
 
       - name: Write candidate release manifest
         env:
