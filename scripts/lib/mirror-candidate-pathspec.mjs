@@ -16,5 +16,6 @@ export const candidatePathspec = Object.freeze([
   ":(exclude)supabase/staging-migrations",
   ":(exclude)public/.well-known/reson8-app.json",
   ":(exclude)src/lib/reson8.ts",
+  ":(exclude)tests/unit/reson8-integration.test.mjs",
   ":(exclude)README.md"
 ]);

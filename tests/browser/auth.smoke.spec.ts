@@ -74,7 +74,14 @@ test("expired stored session returns to a recoverable auth state", async ({ page
     });
   });
 
-  await page.addInitScript(() => {
+  await page.goto(appPath);
+  const storageKey = await page.evaluate(() => {
+    const url = window.__DATANEST_CONFIG__?.supabaseUrl;
+    if (!url) throw new Error("The session recovery test requires configured runtime values.");
+    return "sb-" + new URL(url).hostname.split(".")[0] + "-auth-token";
+  });
+
+  await page.addInitScript((storageKey: string) => {
     const encode = (value: unknown) =>
       btoa(JSON.stringify(value)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
     const accessToken = [
@@ -84,7 +91,7 @@ test("expired stored session returns to a recoverable auth state", async ({ page
     ].join(".");
 
     localStorage.setItem(
-      "sb-qchttpcyqlqnhvahprhz-auth-token",
+      storageKey,
       JSON.stringify({
         access_token: accessToken,
         refresh_token: "expired-refresh-token",
@@ -99,7 +106,7 @@ test("expired stored session returns to a recoverable auth state", async ({ page
         }
       })
     );
-  });
+  }, storageKey);
 
   await page.goto(appPath);
   await expect(
