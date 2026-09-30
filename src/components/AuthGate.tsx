@@ -24,6 +24,7 @@ const DataNestApp = dynamic(() => import("@/components/DataNestApp"), {
 type StartupState = "loading" | "signed-out" | "signed-in" | "set-password" | "config-error" | "connection-error";
 const STARTUP_TIMEOUT_MS = 10000;
 const OWNER_LOGIN_EMAIL = "iace1236912@gmail.com";
+const MIRROR_MODE_LABEL = "OWNER R&D MODE";
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return Promise.race([
@@ -66,6 +67,14 @@ export default function AuthGate() {
         throw result.error;
       }
 
+      if (result.data.session && result.data.session.user.email?.toLowerCase() !== OWNER_LOGIN_EMAIL) {
+        await supabase.auth.signOut();
+        setSession(null);
+        setStartup("signed-out");
+        setStartupMessage("This Mirror-DataNest workspace is restricted to its single owner.");
+        return;
+      }
+
       setSession(result.data.session);
       setStartup(result.data.session
         ? (flowType === "invite" || flowType === "recovery" ? "set-password" : "signed-in")
@@ -84,6 +93,13 @@ export default function AuthGate() {
     if (!supabase) return;
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (nextSession && nextSession.user.email?.toLowerCase() !== OWNER_LOGIN_EMAIL) {
+        void supabase.auth.signOut();
+        setSession(null);
+        setStartup("signed-out");
+        setStartupMessage("This Mirror-DataNest workspace is restricted to its single owner.");
+        return;
+      }
       setSession(nextSession);
       const flowType = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("type")
         || new URLSearchParams(window.location.search).get("type");
@@ -288,9 +304,9 @@ export default function AuthGate() {
       </header>
       <div className="landingLayout">
       <section className="landingStory" aria-labelledby="landing-title">
-        <p className="aiIEyebrow">AI &amp; I · A SHARED WORKSPACE</p>
+        <p className="aiIEyebrow">{MIRROR_MODE_LABEL} · AI &amp; I</p>
         <h2 id="landing-title">Your intent.<br/><span>Amplified.</span></h2>
-        <p className="landingLede">Bring human direction and AI intelligence together. Turn ideas into governed work, with a clear path from first spark to execution.</p>
+        <p className="landingLede">Develop, test and evolve Resonance DataNest and related products in a focused owner workspace. Experiment freely, inspect live behavior, and keep governed collaborative work in DataNest-Supository/DataNest.</p>
         <CollaborationVisual/>
         <ol className="landingSteps" aria-label="The Resonance workflow">
           <li><span>01</span><b>Spark</b><small>Capture intent</small></li>
@@ -302,7 +318,7 @@ export default function AuthGate() {
       <section className="authCard landingSignIn" aria-labelledby="sign-in-title">
         <ResonanceBrandLockup />
         <h1 id="sign-in-title">{DATANEST_CANONICAL_NAME}</h1>
-        <p className="lede">Welcome to your workspace. Sign in to continue.</p>
+        <p className="lede">Single-owner development workspace. Sign in to continue.</p>
 
         <form onSubmit={signIn} className="authForm" aria-busy={busy}>
           <label>
@@ -342,7 +358,7 @@ export default function AuthGate() {
         <div className="authMessageSlot" aria-live="polite" role="status">
           {message && <div className="authMessage">{message}</div>}
         </div>
-        <p className="securityNote">Sign in with your authorized account. Need access? Ask your project administrator for an invitation.</p>
+        <p className="securityNote">Owner access only · iace1236912@gmail.com</p>
       </section>
       </div>
       <PlatformFooter compact />
