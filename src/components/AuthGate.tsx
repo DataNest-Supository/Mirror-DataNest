@@ -285,7 +285,7 @@ export default function AuthGate() {
             </label>
             <button className="primaryButton" disabled={busy} type="submit">{busy ? "Saving…" : "Create password"}</button>
           </form>
-          <div className="authMessageSlot" aria-live="polite" role="status">{message && <div className="authMessage">{message}</div>}</div>
+          <div className="authMessageSlot" aria-live="polite" aria-atomic="true" role="status">{message && <div className="authMessage">{message}</div>}</div>
         </section>
       </main>
     );
@@ -357,7 +357,7 @@ export default function AuthGate() {
           </button>
         </form>
 
-        <div className="authMessageSlot" aria-live="polite" role="status">
+        <div className="authMessageSlot" aria-live="polite" aria-atomic="true" role="status">
           {message && <div className="authMessage">{message}</div>}
         </div>
         <p className="securityNote">Owner access only · authorized account required.</p>
