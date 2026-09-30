@@ -1,11 +1,19 @@
 {
-  "schemaVersion": 3,
-  "mode": "production-parity-rd-test",
+  "schemaVersion": 4,
+  "mode": "single-user-rnd",
   "repository": "DataNest-Supository/Mirror-DataNest",
   "canonicalRepository": "DataNest-Supository/DataNest",
-  "purpose": "Ungated R&D plus live production-parity visual/functional testing before governed canonical certification.",
+  "purpose": "Private-feeling single-owner R&D workspace for developing Resonance DataNest and related products/tools, with live candidate testing independent of the governed collaborative repository.",
+  "owner": {
+    "model": "single-user",
+    "loginEmail": "iace1236912@gmail.com",
+    "role": "owner-developer",
+    "collaborationModel": "disabled-by-default",
+    "sharedWorkspaceFeatures": "hidden-or-disabled"
+  },
   "authority": {
     "sourceOfTruth": false,
+    "rndDevelopmentAuthority": true,
     "mirrorCandidateDeployment": true,
     "canonicalProductionDeployment": false,
     "canonicalReleaseAuthority": false,
@@ -14,8 +22,8 @@
   "gates": {
     "humanApprovalInsideMirrorRequired": false,
     "requiredPullRequestInsideMirror": false,
-    "liveMirrorEvidenceRequiredBeforeProductionCandidate": true,
-    "canonicalGovernanceRequiredBeforeLiveProduction": true
+    "liveMirrorEvidenceRequiredBeforeProductionCandidate": false,
+    "canonicalGovernanceRequiredBeforeCanonicalLiveProduction": true
   },
   "boundaries": {
     "productionBackendWritesAllowed": false,
@@ -30,31 +38,20 @@
     "backendName": "DataNest AI Staging",
     "releaseManifest": "mirror-release.json",
     "liveVerification": "mirror-live-verification.json",
-    "evidencePurpose": "Visual and functional testing of the exact production candidate."
+    "evidencePurpose": "Live R&D validation of the owner's current candidate."
   },
-  "synchronization": {
-    "direction": "Mirror live candidate -> production candidate -> DataNest mirror-promotion/* -> Audit Optimizer -> governance/human approval -> DataNest/main -> canonical live",
-    "directMirrorToMainSyncAllowed": false,
-    "humanReviewerApprovalRequired": true,
-    "evidenceRequired": [
-      "exact Mirror commit",
-      "live Mirror verification reference",
-      "visual/functional Product Lab evidence",
-      "test/build observations",
-      "known regressions",
-      "rollback note",
-      "Audit Optimizer reference",
-      "canonical governance approval"
-    ],
-    "refreshIntervalMinutes": 15,
-    "canonicalContainmentCheck": "skip-refresh-when-canonical-main-is-an-ancestor-of-mirror-main",
-    "liveReviewReference": "mirror-live-verification workflow/artifact"
+  "relationship": {
+    "upstream": "DataNest-Supository/DataNest",
+    "direction": "Mirror is an R&D laboratory; DataNest-Supository/DataNest is the governed collaborative repository.",
+    "automaticCanonicalSync": false,
+    "automaticReverseSync": false,
+    "promotion": "Owner-controlled selective handoff only."
   },
   "fastLane": {
     "directMirrorMainDeploy": true,
     "preDeploymentChecks": "advisory",
-    "liveCandidateReview": "required",
-    "productionCandidateEvidence": "blocking",
+    "liveCandidateReview": "owner-controlled",
+    "productionCandidateEvidence": "optional in Mirror",
     "canonicalProductionAuthority": false,
     "canonicalGovernanceAuthority": false
   }
