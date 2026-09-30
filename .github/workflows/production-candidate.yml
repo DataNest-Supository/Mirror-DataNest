@@ -96,7 +96,9 @@ jobs:
           mkdir -p "$out"
 
           # Use exactly the same Mirror boundary for every package representation.
-          mapfile -t candidate_paths < <(node --input-type=module -e 'import {candidatePathspec} from "./scripts/lib/mirror-candidate-pathspec.mjs"; console.log(candidatePathspec.join("\n"))')
+          node --input-type=module -e 'import {candidatePathspec} from "./scripts/lib/mirror-candidate-pathspec.mjs"; console.log(candidatePathspec.join("\n"))' > "$out/candidate-pathspec.txt"
+          mapfile -t candidate_paths < "$out/candidate-pathspec.txt"
+          test "${#candidate_paths[@]}" -gt 1
           git diff --binary "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/candidate.patch"
 
           git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/changed-files.txt"

@@ -64,7 +64,9 @@ test("offline sign-in failure remains recoverable", async ({ page, context }) =>
 });
 
 test("expired stored session returns to a recoverable auth state", async ({ page }) => {
+  let refreshRequested = false;
   await page.route("**/auth/v1/token**", async (route) => {
+    refreshRequested = true;
     await route.fulfill({
       status: 400,
       contentType: "application/json",
@@ -82,7 +84,7 @@ test("expired stored session returns to a recoverable auth state", async ({ page
     ].join(".");
 
     localStorage.setItem(
-      "sb-sgqdmfgjbprsoqsmgigi-auth-token",
+      "sb-qchttpcyqlqnhvahprhz-auth-token",
       JSON.stringify({
         access_token: accessToken,
         refresh_token: "expired-refresh-token",
@@ -104,6 +106,7 @@ test("expired stored session returns to a recoverable auth state", async ({ page
     page.getByRole("heading", { name: /DataNest|Connection problem/ })
   ).toBeVisible();
   await expect(page.locator(".authShell")).toBeVisible();
+  await expect.poll(() => refreshRequested, { message: "The staging session must actually attempt refresh." }).toBe(true);
 });
 
 

@@ -12,7 +12,7 @@ const css=fs.readFileSync(path.join(root,"src/app/globals.css"),"utf8");
 test("DataNest exposes a dedicated owner R&D Cockpit workspace",()=>{
   assert.match(app,/type ViewKey = "dashboard"\|/);
   assert.match(app,/key:"dashboard",label:"R&D Cockpit"/);
-  assert.match(app,/import\("@\/components\/DataNestDashboard"\)/);
+  assert.match(app,/import\("@\/components\/OwnerRDCockpit"\)/);
   assert.match(app,/view==="dashboard"&&<DataNestDashboard/);
 });
 

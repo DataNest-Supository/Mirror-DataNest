@@ -25,6 +25,11 @@ jobs:
         continue-on-error: true
         run: node scripts/mirror-test-suite.mjs
 
+      - name: Governance control effectiveness contract
+        id: control_monitor
+        continue-on-error: true
+        run: node --test --experimental-strip-types tests/unit/governance-control-effectiveness-monitoring.test.mjs
+
       - name: Type check
         id: typecheck
         continue-on-error: true
@@ -49,6 +54,7 @@ jobs:
             echo
             echo "- Commit: \`$GITHUB_SHA\`"
             echo "- Unit tests: \`${{ steps.tests.outcome }}\`"
+            echo "- Governance contract: \`${{ steps.control_monitor.outcome }}\`"
             echo "- Type check: \`${{ steps.typecheck.outcome }}\`"
             echo "- Dependency audit: \`${{ steps.audit.outcome }}\`"
             echo "- RONSAS imports: \`${{ steps.imports.outcome }}\`"
