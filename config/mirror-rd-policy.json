@@ -25,7 +25,8 @@
   },
   "preview": {
     "preferredPath": "https://datanest-supository.github.io/Mirror-DataNest/",
-    "backendPolicy": "Use isolated R&D/free-tier backend configuration. Do not default to production backend write access."
+    "backendPolicy": "Use isolated R&D/free-tier backend configuration. Do not default to production backend write access.",
+    "environment": "mirror-rd-pages"
   },
   "synchronization": {
     "direction": "Mirror-DataNest -> promotion branch in DataNest -> pull request -> human reviewer -> main",
@@ -37,6 +38,9 @@
       "deployment/preview observations",
       "known regressions",
       "rollback note"
-    ]
+    ],
+    "refreshWorkflow": ".github/workflows/sync-canonical.yml",
+    "refreshModel": "scheduled/manual canonical-main refresh PR into mirror main",
+    "productionPromotion": "R&D candidate -> canonical DataNest draft PR -> human approval -> DataNest/main -> governed production workflow"
   }
 }
