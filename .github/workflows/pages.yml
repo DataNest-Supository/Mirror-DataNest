@@ -25,6 +25,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.MIRROR_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_mirror_placeholder' }}
       DATANEST_UI_RELEASE_SHA: ${{ github.sha }}
       DATANEST_UI_RELEASE_STATE: "mirror_rd_test"
+      NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/node-project-setup
