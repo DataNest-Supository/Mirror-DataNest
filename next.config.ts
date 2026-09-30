@@ -5,7 +5,7 @@ const configuredBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
 const basePath = configuredBasePath !== undefined
   ? configuredBasePath
   : pages
-    ? "/DataNest"
+    ? "/Mirror-DataNest"
     : "";
 
 const nextConfig: NextConfig = {
