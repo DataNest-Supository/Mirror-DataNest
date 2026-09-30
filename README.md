@@ -1,6 +1,8 @@
 # MIRROR-DATANEST — R&D + PRODUCTION-PARITY TEST MODE
 
-> **Ungated development, live candidate testing, no canonical production authority.** Mirror-DataNest may deploy its own live production-parity candidate UI for visual and functional testing. Canonical production remains `DataNest-Supository/DataNest` and requires Audit Optimizer evidence, governance and human approval.
+> **Ungated development and production-parity candidate testing; no canonical production authority.** Mirror-DataNest may deploy its own candidate UI for visual and functional testing.
+>
+> Canonical repository: `DataNest-Supository/DataNest`. Canonical release still requires Audit Optimizer evidence, governance and human approval.
 
 - Live candidate UI: `https://datanest-supository.github.io/Mirror-DataNest/`
 - R&D policy: [`docs/MIRROR_DATANEST_RD_MODE.md`](docs/MIRROR_DATANEST_RD_MODE.md)
@@ -10,7 +12,7 @@
 
 ---
 
-**Certification rule:** every production-bound version must first be deployed and exercised here as a live Mirror candidate. The resulting exact-SHA visual/functional evidence is then carried into `DataNest-Supository/DataNest` for Audit Optimizer review, governance/human approval, and canonical live deployment.
+**Certification rule:** every production-bound version must first be deployed and exercised here as a live Mirror candidate. The exact-SHA visual/functional evidence is then carried into the canonical repository for Audit Optimizer review, governance/human approval, and release authorization.
 
 # DataNest
 
