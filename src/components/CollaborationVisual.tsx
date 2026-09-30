@@ -53,6 +53,7 @@ export default function CollaborationVisual({
   const [applications,setApplications]=useState<ProductApplication[]>([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState("");
+  const [reloadToken,setReloadToken]=useState(0);
 
   useEffect(()=>{
     let active=true;
@@ -105,7 +106,7 @@ export default function CollaborationVisual({
     });
 
     return()=>{active=false;};
-  },[projectId]);
+  },[projectId,reloadToken]);
 
   const applicationCounts=useMemo(()=>{
     const counts=new Map<string,number>();
@@ -247,5 +248,13 @@ export default function CollaborationVisual({
             ?orbitProducts.length+" governed product"+(orbitProducts.length===1?"":"s")+" · "+applications.length+" linked applications"
             :"No governed products imported yet"}
     </span>
+    {error&&<button
+      type="button"
+      className={styles.catalogRetry}
+      onClick={()=>setReloadToken(token=>token+1)}
+      disabled={loading}
+    >
+      Retry catalog sync
+    </button>}
   </div>;
 }
