@@ -1,3 +1,13 @@
+# MIRROR-DATANEST — R&D TEST MODE
+
+> **Ungated experimental clone.** This repository is not the production authority. Canonical production remains `DataNest-Supository/DataNest`. Changes are promoted only through a canonical pull request requiring human-reviewer approval.
+
+- R&D policy: [`docs/MIRROR_DATANEST_RD_MODE.md`](docs/MIRROR_DATANEST_RD_MODE.md)
+- Machine policy: [`config/mirror-rd-policy.json`](config/mirror-rd-policy.json)
+- Intended preview: `https://datanest-supository.github.io/Mirror-DataNest/`
+
+---
+
 # DataNest
 
 **DataNest** is the canonical Resonance AppDev web control plane. It governs product execution intent, promotion, evidence and lifecycle state while preserving separate source, backend and delivery authorities.
