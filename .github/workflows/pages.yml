@@ -27,6 +27,14 @@ jobs:
       DATANEST_UI_RELEASE_STATE: "candidate"
       NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
       MIRROR_PUBLIC_URL: "https://datanest-supository.github.io/Mirror-DataNest/"
+      DATANEST_EDGE_AI: "datanest-ai-chat@2"
+      DATANEST_EDGE_INTAKE: "datanest-ai-intake@1"
+      DATANEST_EDGE_CERTIFICATION: "datanest-ai-certification@1"
+      DATANEST_EDGE_PROVIDER: "manage-ai-provider-v2@1"
+      DATANEST_EDGE_INVITES: "send-job-invite@1"
+      DATANEST_EDGE_PROJECT_INVITES: "send-project-member-invite@3"
+      DATANEST_EDGE_RONSAS_STATUS: "ronsas-status@1"
+      DATANEST_EDGE_EXTERNAL_AUDIT: "external-audit@1"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/node-project-setup
@@ -51,6 +59,12 @@ jobs:
           SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
           SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
         run: node scripts/write-runtime-config.mjs public/runtime-config.js
+
+      - name: Write candidate release manifest
+        env:
+          DATANEST_RELEASE_SHA: ${{ github.sha }}
+          DATANEST_DB_RELEASE: "staging-certification-current"
+        run: node scripts/write-release-manifest.mjs public/release-manifest.json
 
       - name: Write immutable Mirror release manifest
         shell: bash
@@ -142,6 +156,8 @@ jobs:
           base="https://datanest-supository.github.io/Mirror-DataNest"
           curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/mirror-release.json" -o /tmp/mirror-release.json
           grep -q "\"commit\":\"$GITHUB_SHA\"" /tmp/mirror-release.json
+          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/release-manifest.json" -o /tmp/release-manifest.json
+          grep -q '"projectInvitations":"send-project-member-invite@3"' /tmp/release-manifest.json
           for route in "" legal governance accessibility terms privacy disclaimers acceptable-use intellectual-property; do
             suffix=""
             if [ -n "$route" ]; then suffix="$route/"; fi
