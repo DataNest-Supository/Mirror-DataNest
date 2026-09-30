@@ -6,7 +6,7 @@ test("Mirror live surface exposes the single-owner R&D gate", async ({ page }) =
   await page.goto(appPath);
 
   await expect(page.getByRole("heading", { name: "DataNest", exact: true })).toBeVisible();
-  await expect(page.getByText("OWNER R&D MODE", { exact: true })).toBeVisible();
+  await expect(page.getByText("OWNER R&D MODE · AI & I", { exact: true })).toBeVisible();
   await expect(page.getByText("Single-owner development workspace. Sign in to continue.", { exact: true })).toBeVisible();
   await expect(page.getByText("Owner access only · iace1236912@gmail.com", { exact: true })).toBeVisible();
 
@@ -23,7 +23,7 @@ test("Mirror live shell remains usable on a narrow viewport", async ({ page }) =
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(appPath);
 
-  await expect(page.getByText("OWNER R&D MODE", { exact: true })).toBeVisible();
+  await expect(page.getByText("OWNER R&D MODE · AI & I", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Email")).toBeVisible();
   await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeEnabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
