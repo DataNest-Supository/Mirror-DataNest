@@ -91,6 +91,8 @@ jobs:
           test -s public/runtime-config.js
           grep -Fq 'https://qchttpcyqlqnhvahprhz.supabase.co' public/runtime-config.js
           grep -Fq 'sb_publishable_' public/runtime-config.js
+          grep -Fq 'releaseSha' public/runtime-config.js
+          grep -Fq "$GITHUB_SHA" public/runtime-config.js
 
 
       - name: Write candidate release manifest
