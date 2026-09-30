@@ -18,6 +18,7 @@ jobs:
   build:
     name: Build production-parity Mirror
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     env:
       DATANEST_STATIC_EXPORT: "true"
       NEXT_PUBLIC_BASE_PATH: "/Mirror-DataNest"
@@ -41,18 +42,24 @@ jobs:
 
       - name: Unit tests
         id: unit_tests
-        continue-on-error: true
         run: node scripts/mirror-test-suite.mjs
 
       - name: Type check
         id: type_check
-        continue-on-error: true
         run: npm run check
 
       - name: Dependency audit
         id: dependency_audit
-        continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
+
+      - name: Enforce production-candidate evidence gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ steps.unit_tests.outcome }}" = "success"
+          test "${{ steps.type_check.outcome }}" = "success"
+          test "${{ steps.dependency_audit.outcome }}" = "success"
+          echo "Blocking Mirror evidence gate passed; packaging may proceed."
 
       - name: Write isolated staging runtime configuration
         env:
