@@ -24,7 +24,7 @@ jobs:
       - name: Unit tests
         id: tests
         continue-on-error: true
-        run: npm test
+        run: node scripts/mirror-test-suite.mjs
 
       - name: Type check
         id: typecheck
