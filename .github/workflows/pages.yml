@@ -217,7 +217,7 @@ jobs:
           }
 
           fetch_until_json_value "$base/mirror-release.json" /tmp/mirror-release.json '.commit == $expected' "$GITHUB_SHA"
-          fetch_until_json_value "$base/release-manifest.json" /tmp/release-manifest.json '.projectInvitations == $expected' "send-project-member-invite@3"
+          fetch_until_json_value "$base/release-manifest.json" /tmp/release-manifest.json '.edgeFunctions.projectInvitations == $expected' "send-project-member-invite@3"
           # GitHub Pages serves the static shell/manifests here; application route reachability
           # is verified by the live Playwright suite below. Do not require every client-side
           # route or app path to exist as a standalone server resource.
