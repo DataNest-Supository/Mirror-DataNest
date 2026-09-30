@@ -76,12 +76,30 @@ jobs:
       - name: Create mirror refresh PR
         if: steps.compare.outputs.changed == 'true'
         env:
-          GH_TOKEN: $GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
+          set -euo pipefail
           BRANCH="sync/canonical-main-$(git rev-parse canonical/main | cut -c1-12)"
-          if gh pr list --head "$BRANCH" --base main --json number --jq '.[0].number' | grep -q .; then
+          API_URL="https://api.github.com/repos/DataNest-Supository/Mirror-DataNest/pulls"
+          EXISTING="$(curl -fsSL \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$API_URL?state=open&head=DataNest-Supository:$BRANCH&base=main")"
+          if [ "$(printf '%s' "$EXISTING" | jq 'length')" -gt 0 ]; then
             echo "Refresh PR already exists for $BRANCH"
             exit 0
           fi
-          gh pr create --base main --head "$BRANCH" --title "Sync canonical DataNest main into R&D mirror" --body "Canonical DataNest/main moved. This refreshes the R&D baseline only; Mirror-owned Actions workflows remain authoritative for Mirror execution and Pages publication."
+          jq -n \
+            --arg title "Sync canonical DataNest main into R&D mirror" \
+            --arg head "$BRANCH" \
+            --arg body "Canonical DataNest/main moved. This refreshes the R&D baseline only; Mirror-owned Actions workflows remain authoritative for Mirror execution and Pages publication." \
+            '{title:$title, head:$head, base:"main", body:$body}' \
+            | curl -fsSL -X POST \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "$API_URL" \
+              --data-binary @- \
+              | tee /tmp/create-pr-response.json \
+              | jq -e '.number and .html_url'
