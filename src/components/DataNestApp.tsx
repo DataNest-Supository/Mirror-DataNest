@@ -1414,7 +1414,7 @@ export default function DataNestApp({session}:{session:Session}) {
   const currentNavItem=nav.find(item=>item.key===view);
   const currentLabel=currentNavItem?.label||"Overview";
   const currentDescription=viewDescriptions[view];
-  const currentGroup=currentNavItem?.group||"Core";
+  const currentGroup=currentNavItem?.group||"Build";
   const currentPhase=workflowPhaseForView(view);
   const activeContextAction=activeContextActionForView(view);
   const activeJobJourneyCurrent=activeJobJourneySteps.some(step=>step.key===view)?view:null;

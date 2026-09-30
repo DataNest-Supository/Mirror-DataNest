@@ -12,27 +12,31 @@ const contract=JSON.parse(readFileSync(new URL("../../public/.well-known/reson8-
 
 test("DataNest declares its live public endpoint without a DNS cutover",()=>{
   assert.match(binding,/RESON8_HUB_URL = "https:\/\/reson8\.life\/"/);
-  assert.match(binding,/DATANEST_PUBLIC_URL = "https:\/\/datanest-supository\.github\.io\/DataNest\/"/);
+  assert.match(binding,/DATANEST_PUBLIC_URL = "https:\/\/datanest-supository\.github\.io\/Mirror-DataNest\/"/);
   assert.match(binding,/DATANEST_CANONICAL_NAME = "DataNest"/);
   assert.equal(contract.contract,"reson8-app@1");
-  assert.equal(contract.key,"datanest");
-  assert.equal(contract.name,"DataNest");
-  assert.equal(contract.displayName,"DataNest");
+  assert.equal(contract.key,"mirror-datanest");
+  assert.equal(contract.name,"Mirror-DataNest");
+  assert.equal(contract.displayName,"Mirror-DataNest");
   assert.equal(contract.canonicalHost,"datanest-supository.github.io");
-  assert.equal(contract.brandedUrl,"https://datanest-supository.github.io/DataNest/");
-  assert.equal(contract.brandedState,"live");
-  assert.equal(contract.wire?.source,"https://datanest-supository.github.io/DataNest/");
-  assert.equal(contract.wire?.target,"https://datanest-supository.github.io/DataNest/");
+  assert.equal(contract.brandedUrl,"https://datanest-supository.github.io/Mirror-DataNest/");
+  assert.equal(contract.brandedState,"candidate");
+  assert.equal(contract.wire?.source,"https://datanest-supository.github.io/Mirror-DataNest/");
+  assert.equal(contract.wire?.target,"https://datanest-supository.github.io/Mirror-DataNest/");
   assert.equal(contract.wire?.mode,"direct");
   assert.equal(contract.wire?.applicationLayer,"not-required");
   assert.equal(contract.wire?.networkState,"not-applicable");
-  assert.equal(contract.publicUrl,"https://datanest-supository.github.io/DataNest/");
+  assert.equal(contract.publicUrl,"https://datanest-supository.github.io/Mirror-DataNest/");
   assert.equal(contract.hubUrl,"https://reson8.life/");
-  assert.equal(contract.operationalUrl,"https://datanest-supository.github.io/DataNest/");
+  assert.equal(contract.operationalUrl,"https://datanest-supository.github.io/Mirror-DataNest/");
   assert.equal(contract.delivery?.provider,"GitHub Pages");
-  assert.equal(contract.delivery?.status,"live");
-  assert.equal(contract.delivery?.url,"https://datanest-supository.github.io/DataNest/");
+  assert.equal(contract.delivery?.status,"candidate");
+  assert.equal(contract.delivery?.url,"https://datanest-supository.github.io/Mirror-DataNest/");
   assert.equal(contract.billing,"none");
+  assert.equal(contract.sourceRepository,"DataNest-Supository/Mirror-DataNest");
+  assert.equal(contract.authority,"owner-rnd");
+  assert.equal(contract.runtimeConfigAuthority,contract.publicUrl+"runtime-config.js");
+  assert.equal(contract.canonicalRepository,"DataNest-Supository/DataNest");
 });
 
 test("DataNest keeps a visible navigation path to the Reson8 Hub",()=>{

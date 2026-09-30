@@ -15,8 +15,9 @@ const app=readFileSync(
   "utf8"
 );
 
-test("Think Tanks are project-scoped and exposed in DataNest navigation",()=>{
-  assert.match(app,/label:"Think Tanks"/);
+test("Think Tanks retain project-scoped access outside primary R&D navigation",()=>{
+  assert.doesNotMatch(app,/\{key:"thinktank",/);
+  assert.match(app,/setView\("thinktank"\)/);
   assert.match(app,/view==="thinktank"/);
   assert.match(workspace,/THINK TANKS \+ DATANEST AI/);
   assert.match(migration,/private\.has_project_access\(project_id\)/);

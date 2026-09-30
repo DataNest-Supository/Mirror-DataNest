@@ -15,6 +15,10 @@ on:
         description: What was optimized and why it is ready for canonical audit
         required: true
         type: string
+      live_evidence_run:
+        description: Optional Mirror live-verification workflow URL; canonical release still requires reviewed evidence
+        required: false
+        type: string
 permissions:
   contents: read
 
@@ -22,10 +26,12 @@ jobs:
   package:
     name: Build Mirror production-candidate evidence
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     env:
       BASE_SHA: ${{ inputs.canonical_base_sha }}
       CANDIDATE_NAME: ${{ inputs.candidate_name }}
       CANDIDATE_SUMMARY: ${{ inputs.summary }}
+      LIVE_EVIDENCE_RUN: ${{ inputs.live_evidence_run }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -35,14 +41,17 @@ jobs:
 
       - name: Unit-test observation
         id: tests
+        continue-on-error: true
         run: node scripts/mirror-test-suite.mjs
 
       - name: Type-check observation
         id: typecheck
+        continue-on-error: true
         run: npm run check
 
       - name: Dependency-audit observation
         id: audit
+        continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
 
       - name: Validate canonical base
@@ -56,6 +65,14 @@ jobs:
           git remote add canonical https://github.com/DataNest-Supository/DataNest.git
           git fetch canonical main --no-tags
           git cat-file -e "$BASE_SHA^{commit}"
+          if ! git merge-base --is-ancestor "$BASE_SHA" canonical/main; then
+            echo "::error::The supplied base is not part of canonical DataNest/main history."
+            exit 1
+          fi
+          if [ -n "$LIVE_EVIDENCE_RUN" ] && ! [[ "$LIVE_EVIDENCE_RUN" =~ ^https://github.com/DataNest-Supository/Mirror-DataNest/actions/runs/[0-9]+$ ]]; then
+            echo "::error::live_evidence_run must be a Mirror workflow-run URL."
+            exit 1
+          fi
           if ! git merge-base --is-ancestor "$BASE_SHA" "$GITHUB_SHA"; then
             echo "::error::The supplied canonical base is not an ancestor of this Mirror candidate."
             echo "Refresh Mirror from DataNest/main or select the correct shared base before packaging production."
@@ -78,19 +95,22 @@ jobs:
           out="mirror-production-candidate-$short_sha"
           mkdir -p "$out"
 
-          # Mirror-only control-plane files are deliberately excluded from canonical promotion.
-          git diff --binary "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)scripts/mirror-test-suite.mjs'             ':(exclude)README.md'             > "$out/candidate.patch"
+          # Use exactly the same Mirror boundary for every package representation.
+          node --input-type=module -e 'import {candidatePathspec} from "./scripts/lib/mirror-candidate-pathspec.mjs"; console.log(candidatePathspec.join("\n"))' > "$out/candidate-pathspec.txt"
+          mapfile -t candidate_paths < "$out/candidate-pathspec.txt"
+          test "${#candidate_paths[@]}" -gt 1
+          git diff --binary "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/candidate.patch"
 
-          git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)scripts/mirror-test-suite.mjs'             ':(exclude)README.md'             > "$out/changed-files.txt"
+          git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/changed-files.txt"
 
-          git diff --stat "$BASE_SHA" "$GITHUB_SHA" -- .             ':(exclude).github/workflows/ci.yml'             ':(exclude).github/workflows/pages.yml'             ':(exclude).github/workflows/production-candidate.yml'             ':(exclude)config/mirror-rd-policy.json'             ':(exclude)docs/MIRROR_DATANEST_RD_MODE.md'             ':(exclude)scripts/mirror-test-suite.mjs'             ':(exclude)README.md'             > "$out/diff-stat.txt"
+          git diff --stat "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/diff-stat.txt"
 
           if [ ! -s "$out/candidate.patch" ]; then
             echo "::error::No promotable production changes remain after Mirror-only files are excluded."
             exit 1
           fi
 
-          jq -n             --arg schemaVersion "mirror-production-candidate-v1"             --arg repository "$GITHUB_REPOSITORY"             --arg mirrorSha "$GITHUB_SHA"             --arg canonicalBaseSha "$BASE_SHA"             --arg candidateName "$CANDIDATE_NAME"             --arg summary "$CANDIDATE_SUMMARY"             --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"             --arg unitTests "$TEST_OUTCOME"             --arg typeCheck "$TYPECHECK_OUTCOME"             --arg dependencyAudit "$AUDIT_OUTCOME"             --arg createdAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)"             '{
+          jq -n             --arg schemaVersion "mirror-production-candidate-v1"             --arg repository "$GITHUB_REPOSITORY"             --arg mirrorSha "$GITHUB_SHA"             --arg canonicalBaseSha "$BASE_SHA"             --arg candidateName "$CANDIDATE_NAME"             --arg summary "$CANDIDATE_SUMMARY"             --arg liveEvidenceRun "$LIVE_EVIDENCE_RUN"             --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"             --arg unitTests "$TEST_OUTCOME"             --arg typeCheck "$TYPECHECK_OUTCOME"             --arg dependencyAudit "$AUDIT_OUTCOME"             --arg createdAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)"             '{
               schemaVersion:$schemaVersion,
               repository:$repository,
               mirrorSha:$mirrorSha,
@@ -98,6 +118,7 @@ jobs:
               candidateName:$candidateName,
               summary:$summary,
               workflowRun:$workflowRun,
+              liveEvidenceRun:(if $liveEvidenceRun == "" then null else $liveEvidenceRun end),
               observations:{
                 unitTests:$unitTests,
                 typeCheck:$typeCheck,

@@ -15,8 +15,9 @@ const app=readFileSync(
   "utf8"
 );
 
-test("Sovereign Governance is exposed as a project workspace",()=>{
-  assert.match(app,/label:"Governance"/);
+test("Sovereign Governance remains an owner utility outside primary R&D navigation",()=>{
+  assert.doesNotMatch(app,/\{key:"governance",/);
+  assert.match(app,/setView\("governance"\)/);
   assert.match(app,/view==="governance"/);
   assert.match(workspace,/RESONANCE SOVEREIGN GOVERNANCE/);
   assert.match(workspace,/<h2>Project governance<\/h2>/);

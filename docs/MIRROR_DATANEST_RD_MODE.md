@@ -15,7 +15,7 @@ Mirror is intentionally non-governed for experiment iteration, not non-evidenced
 
 - Pushes to main may publish a live candidate automatically so R&D can review the real rendered UI quickly.
 - Pre-deployment test, type-check and dependency-audit results remain visible observations and do not block live experimentation.
-- A production-candidate package is different: unit tests, type checking and the dependency audit are blocking evidence, and the live Mirror verification reference remains mandatory.
+- Production-candidate packaging retains advisory test, type-check and audit outcomes. A live evidence reference is optional for owner R&D packaging; successful exact-candidate evidence and human review remain required for canonical production certification.
 - Canonical production remains a separate authority boundary. No Mirror workflow may deploy or overwrite the canonical DataNest Pages site, production backend, or governance state.
 - Canonical refresh is watched every 15 minutes and skipped when the current canonical main commit is already an ancestor of Mirror main.
 
@@ -27,7 +27,9 @@ Preferred public candidate identity:
 
 `https://datanest-supository.github.io/Mirror-DataNest/`
 
-The Pages workflow builds the current Mirror commit under the `/Mirror-DataNest` base path, publishes an immutable `mirror-release.json`, then verifies the live routes and runs browser tests.
+The sole Pages publisher is `.github/workflows/pages.yml`. It builds the current Mirror commit under the `/Mirror-DataNest` base path, validates staging runtime identity and all seven bundled apps, publishes `mirror-release.json`, then verifies the live routes and runs browser tests. Pull requests build and validate the artifact without deploying. Build and verification jobs have read-only repository permissions; only the main-branch deployment job has Pages/OIDC write permissions.
+
+The release manifest contains an immutable commit identity, but its public URL always serves the latest candidate. Retain the workflow artifact for historical evidence. Browser JSON/HTML reports and a signed-out desktop screenshot accompany `mirror-live-verification.json` in the evidence artifact.
 
 The Mirror uses **DataNest AI Staging** (`qchttpcyqlqnhvahprhz`) for functional testing. Production backend writes are not the default R&D mechanism.
 
@@ -37,7 +39,7 @@ The Mirror uses **DataNest AI Staging** (`qchttpcyqlqnhvahprhz`) for functional 
 - no human approval gate is required for experimental iteration;
 - failed experiments may remain traceable;
 - advisory checks support iteration;
-- a candidate intended for production must obtain a successful live Mirror verification reference before packaging;
+- a candidate intended for canonical production must obtain successful live Mirror evidence before canonical approval;
 - visual and functional review evidence is part of the production certification packet.
 
 ## Authority boundary

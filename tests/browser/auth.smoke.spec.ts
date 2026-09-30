@@ -14,7 +14,7 @@ test("renders the signed-out application without uncaught browser errors", async
 });
 
 test("shows a recoverable configuration error", async ({ page }) => {
-  await page.route("**/runtime-config.js", async (route) => {
+  await page.route(/\/runtime-config\.js(?:\?.*)?$/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/javascript",
@@ -64,7 +64,9 @@ test("offline sign-in failure remains recoverable", async ({ page, context }) =>
 });
 
 test("expired stored session returns to a recoverable auth state", async ({ page }) => {
+  let refreshRequested = false;
   await page.route("**/auth/v1/token**", async (route) => {
+    refreshRequested = true;
     await route.fulfill({
       status: 400,
       contentType: "application/json",
@@ -72,7 +74,14 @@ test("expired stored session returns to a recoverable auth state", async ({ page
     });
   });
 
-  await page.addInitScript(() => {
+  await page.goto(appPath);
+  const storageKey = await page.evaluate(() => {
+    const url = window.__DATANEST_CONFIG__?.supabaseUrl;
+    if (!url) throw new Error("The session recovery test requires configured runtime values.");
+    return "sb-" + new URL(url).hostname.split(".")[0] + "-auth-token";
+  });
+
+  await page.addInitScript((storageKey: string) => {
     const encode = (value: unknown) =>
       btoa(JSON.stringify(value)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
     const accessToken = [
@@ -82,7 +91,7 @@ test("expired stored session returns to a recoverable auth state", async ({ page
     ].join(".");
 
     localStorage.setItem(
-      "sb-sgqdmfgjbprsoqsmgigi-auth-token",
+      storageKey,
       JSON.stringify({
         access_token: accessToken,
         refresh_token: "expired-refresh-token",
@@ -97,13 +106,14 @@ test("expired stored session returns to a recoverable auth state", async ({ page
         }
       })
     );
-  });
+  }, storageKey);
 
   await page.goto(appPath);
   await expect(
     page.getByRole("heading", { name: /DataNest|Connection problem/ })
   ).toBeVisible();
   await expect(page.locator(".authShell")).toBeVisible();
+  await expect.poll(() => refreshRequested, { message: "The staging session must actually attempt refresh." }).toBe(true);
 });
 
 

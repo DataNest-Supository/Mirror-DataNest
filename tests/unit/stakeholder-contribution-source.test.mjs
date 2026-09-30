@@ -40,8 +40,9 @@ test("scoring is impact-first rather than activity-first",()=>{
   assert.match(migration,/'raw_ai_usage_is_not_score',true/);
 });
 
-test("stakeholder UI exposes simple and detailed views without restoring retired capacity UI",()=>{
-  assert.match(app,/label:"Stakeholder"/);
+test("stakeholder utility retains simple and detailed views outside primary R&D navigation",()=>{
+  assert.doesNotMatch(app,/\{key:"stakeholder",/);
+  assert.match(app,/setView\("stakeholder"\)/);
   assert.match(workspace,/Simple UI/);
   assert.match(workspace,/Detailed UI/);
   assert.match(workspace,/Contribution share/);

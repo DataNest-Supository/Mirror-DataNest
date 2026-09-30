@@ -1,43 +1,37 @@
 # Mirror production-candidate handoff
 
-Every change intended for canonical production must first be deployed and tested as a live Mirror candidate, then leave `Mirror-DataNest` through the production-candidate handoff.
+Mirror is an owner-controlled R&D laboratory. Its deployment and observation results do not grant canonical production authority.
 
-## Required flow
+## Owner-selected packaging
 
-1. Complete R&D in Mirror-DataNest.
-2. Let **Mirror Production-Parity Candidate** deploy the exact commit to the Mirror Pages URL.
-3. Complete live route/browser verification and human visual/functional testing as applicable.
-4. Retain the successful Mirror live evidence reference.
-5. Run **Package Production Candidate**.
-6. Supply:
-   - exact canonical DataNest base SHA;
-   - candidate name/summary;
-   - successful live Mirror evidence reference.
-7. Package the exact Mirror SHA, production patch and observations.
-8. Import it into a `mirror-promotion/*` branch in `DataNest-Supository/DataNest`.
-9. Run canonical validation and DataNest Audit Optimizer review.
-10. Complete formal governance and human reviewer approval.
-11. Deploy the approved exact SHA from canonical DataNest only.
+1. Develop and deploy the candidate in Mirror.
+2. Inspect the exact-SHA release manifests and live evidence artifact from **Mirror Production-Parity Candidate**.
+3. Run **Package Production Candidate** with the exact shared canonical base SHA, candidate name and summary.
+4. Optionally supply a Mirror workflow-run URL in `live_evidence_run`. This is a reference, not proof of successful verification.
+5. Retain the patch, changed-file list, diff statistics and candidate observations.
 
-## Live Mirror evidence
+Unit tests, type checking and dependency auditing are advisory inside Mirror, including packaging. Their actual outcomes remain in the candidate manifest. Invalid base SHAs, malformed evidence references and empty patches stop packaging because no valid handoff can be produced.
 
-The Mirror live workflow produces:
+The shared base must belong to both canonical DataNest/main history and the candidate's history. The patch, changed-file list and diff statistics use the same exclusion list in `scripts/lib/mirror-candidate-pathspec.mjs`. Mirror workflow/action configuration, coordination records, staging-only migrations and Mirror-only verification tools are excluded. Application changes still need canonical review for staging URLs, owner-only behavior and environment-specific assumptions.
 
-- `mirror-release.json` — immutable build/release identity;
-- `mirror-live-verification.json` — live route/browser outcome;
-- Playwright/test artifacts where available;
-- workflow run reference.
+## Canonical production review
 
-A candidate package without a live Mirror evidence reference is incomplete.
+Import the candidate into a `mirror-promotion/*` branch in `DataNest-Supository/DataNest`. Before canonical deployment:
 
-## Update-management relationship
+- retain successful route/browser evidence for the exact candidate and human visual/functional review as applicable;
+- run canonical validation and Audit Optimizer review;
+- record evidence in the existing Product Lab/governance models;
+- obtain governance and human reviewer approval;
+- deploy the approved canonical SHA through DataNest.
 
-The canonical DataNest admin R&D toggle synchronizes the live Mirror build into existing `product_surfaces` and `governance_observations`. Human test evidence is recorded in existing `product_test_runs`. This means candidate version management, visual/functional evidence and Audit Optimizer review remain within the current DataNest database models.
+Missing or failed Mirror observations must remain visible to canonical reviewers. A package or a green advisory workflow is not certification.
 
-## Optional automatic repository handoff
+## Evidence
 
-A repository secret named `DATANEST_PROMOTION_TOKEN` may be configured with only the permission needed to send the production-candidate `repository_dispatch` event to `DataNest-Supository/DataNest`.
+`mirror-release.json` identifies the deployed candidate. `mirror-live-verification.json`, browser JSON/HTML reports and screenshots are retained in the workflow's `mirror-live-evidence-*` artifact. The verification JSON is a workflow artifact, not a public Pages endpoint.
 
-That token only transports candidate metadata. It grants no canonical production deployment authority.
+The canonical admin R&D toggle uses Mirror release identity with the existing `product_surfaces`, `governance_observations` and `product_test_runs` models.
 
-If the token is absent, the candidate artifact can still be imported through the canonical workflow manually.
+## Optional transport
+
+If `DATANEST_PROMOTION_TOKEN` is configured, the packaging workflow sends candidate metadata to canonical DataNest. Otherwise the package remains available for manual import. Transport never grants canonical deployment authority.
