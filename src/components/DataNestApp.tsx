@@ -1715,7 +1715,6 @@ export default function DataNestApp({session}:{session:Session}) {
         {!loadingCore&&project&&view==="dashboard"&&<DataNestDashboard
           projectId={project.id}
           projectName={project.name}
-          role={membership?.role||"viewer"}
           counts={summary}
           jobs={recentJobs}
           runCount={runCount}
@@ -1772,6 +1771,8 @@ export default function DataNestApp({session}:{session:Session}) {
     />}
   </div>;
 }
+
+function Metric({label,value,note}:{label:string;value:number;note:string}) { return <article className="metricCard"><span>{label}</span><strong>{value}</strong><small>{note}</small></article>; }
 
 function Overview({project,tools,jobs,counts,setView,canOperate}:{project:Project;tools:Tool[];jobs:Job[];counts:Summary;setView:(v:ViewKey)=>void;canOperate:boolean}) {
   const developmentSurfaces:Array<{key:ViewKey;label:string;description:string;glyph:string}> = [
