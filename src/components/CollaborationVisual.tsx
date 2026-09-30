@@ -161,7 +161,7 @@ export default function CollaborationVisual({
     </div>;
   }
 
-  return <div className={"aiICoreStage "+styles.productsHeroVisual} aria-label={ariaLabel} data-hero-ecosystem="ronsas">
+  return <div className={"aiICoreStage "+styles.productsHeroVisual} aria-label={ariaLabel} aria-busy={loading} data-hero-ecosystem="ronsas">
     <div className={styles.valueNetwork} aria-label="Resonance DataNest value network">
       <span className={styles.aiCorePulse} data-hero-signal="ai-core" aria-hidden="true"/>
       <span className={styles.valueSignal+" "+styles.aiSignal} data-signal="ai" aria-hidden="true"/>
