@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 
 const target = resolve(process.argv[2] || "public/runtime-config.js");
 const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const key = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
+const key = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";\nconst releaseSha = process.env.DATANEST_UI_RELEASE_SHA || process.env.GITHUB_SHA || "";
 
 mkdirSync(dirname(target), { recursive: true });
 writeFileSync(
