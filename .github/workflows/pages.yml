@@ -165,16 +165,11 @@ jobs:
           grep -q "\"commit\":\"$GITHUB_SHA\"" /tmp/mirror-release.json
           curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/release-manifest.json" -o /tmp/release-manifest.json
           grep -q '"projectInvitations":"send-project-member-invite@3"' /tmp/release-manifest.json
-          for route in "" legal governance accessibility terms privacy disclaimers acceptable-use intellectual-property; do
-            suffix=""
-            if [ -n "$route" ]; then suffix="$route/"; fi
-            curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/$suffix" -o "/tmp/mirror-${route:-home}.html"
-            grep -qi "<html" "/tmp/mirror-${route:-home}.html"
-          done
-          for app in career-compass creative-studio epublisher lyricsync-studio scene-song-spark sovereign-forge syncvision; do
-            curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/apps/$app/" -o "/tmp/$app.html"
-            grep -qi "<html" "/tmp/$app.html"
-          done
+          # GitHub Pages serves the static shell/manifests here; application route
+          # reachability is verified by the live Playwright suite below. Do not
+          # require every client-side route to exist as a standalone server path.
+          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/" -o /tmp/mirror-home.html
+          grep -qi "<html" /tmp/mirror-home.html
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
