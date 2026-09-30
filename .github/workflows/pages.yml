@@ -1,4 +1,4 @@
-name: Mirror R&D Preview
+name: Mirror Production-Parity Candidate
 
 on:
   push:
@@ -11,65 +11,210 @@ permissions:
   id-token: write
 
 concurrency:
-  group: mirror-rd-pages
+  group: mirror-production-parity
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Build ungated R&D preview
+    name: Build production-parity Mirror
     runs-on: ubuntu-24.04
     env:
       DATANEST_STATIC_EXPORT: "true"
       NEXT_PUBLIC_BASE_PATH: "/Mirror-DataNest"
-      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.MIRROR_SUPABASE_URL || 'https://mirror-datanest.invalid' }}
+      NEXT_PUBLIC_SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
       DATANEST_UI_RELEASE_SHA: ${{ github.sha }}
-      DATANEST_UI_RELEASE_STATE: "mirror_rd_test"
+      DATANEST_UI_RELEASE_STATE: "candidate"
       NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
+      MIRROR_PUBLIC_URL: "https://datanest-supository.github.io/Mirror-DataNest/"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: ./.github/actions/node-project-setup
 
-      - name: Advisory tests
+      - name: Unit tests
+        id: unit_tests
         continue-on-error: true
         run: npm test
 
-      - name: Advisory type check
+      - name: Type check
+        id: type_check
         continue-on-error: true
         run: npm run check
 
-      - name: Write isolated mirror runtime configuration
+      - name: Dependency audit
+        id: dependency_audit
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Write isolated staging runtime configuration
         env:
-          SUPABASE_URL: ${{ vars.MIRROR_SUPABASE_URL || 'https://mirror-datanest.invalid' }}
+          SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
           SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
         run: node scripts/write-runtime-config.mjs public/runtime-config.js
 
-      - name: Write mirror identity marker
+      - name: Write immutable Mirror release manifest
         shell: bash
+        env:
+          UNIT_TESTS: ${{ steps.unit_tests.outcome }}
+          TYPE_CHECK: ${{ steps.type_check.outcome }}
+          DEP_AUDIT: ${{ steps.dependency_audit.outcome }}
         run: |
+          short_sha="${GITHUB_SHA:0:12}"
+          release_id="mirror-${GITHUB_RUN_NUMBER}-$short_sha"
+          jq -n \
+            --arg schemaVersion "mirror-live-release-v1" \
+            --arg mode "production-parity-candidate" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg commit "$GITHUB_SHA" \
+            --arg releaseId "$release_id" \
+            --arg publicUrl "$MIRROR_PUBLIC_URL" \
+            --arg canonicalRepository "DataNest-Supository/DataNest" \
+            --arg canonicalPublicUrl "https://datanest-supository.github.io/DataNest/" \
+            --arg backendProject "qchttpcyqlqnhvahprhz" \
+            --arg backendMode "isolated-staging" \
+            --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg unitTests "$UNIT_TESTS" \
+            --arg typeCheck "$TYPE_CHECK" \
+            --arg dependencyAudit "$DEP_AUDIT" \
+            --arg generatedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              schemaVersion:$schemaVersion,
+              mode:$mode,
+              repository:$repository,
+              commit:$commit,
+              releaseId:$releaseId,
+              publicUrl:$publicUrl,
+              canonicalRepository:$canonicalRepository,
+              canonicalPublicUrl:$canonicalPublicUrl,
+              backend:{project:$backendProject,mode:$backendMode},
+              observations:{unitTests:$unitTests,typeCheck:$typeCheck,dependencyAudit:$dependencyAudit},
+              workflowRun:$workflowRun,
+              authority:{productionSource:false,canonicalDeployment:false,governance:false},
+              evidencePurpose:"Visual and functional testing of the exact production candidate before canonical certification.",
+              generatedAt:$generatedAt
+            }' > public/mirror-release.json
+
           cat > public/mirror-rd.json <<EOF
-          {"ok":true,"mode":"mirror-rd-test","repository":"DataNest-Supository/Mirror-DataNest","commit":"$GITHUB_SHA","canonicalRepository":"DataNest-Supository/DataNest","productionAuthority":false}
+          {"ok":true,"mode":"production-parity-candidate","repository":"DataNest-Supository/Mirror-DataNest","commit":"$GITHUB_SHA","releaseId":"$release_id","canonicalRepository":"DataNest-Supository/DataNest","backend":"DataNest AI Staging","productionAuthority":false}
           EOF
 
-      - name: Build static preview
+      - name: Build static production-parity site
         run: npm run build
 
       - name: Build DataNest-hosted RONSAS apps
         run: node scripts/build-ronsas-pages.mjs
 
-      - uses: actions/configure-pages@v5
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: ./out
 
   deploy:
-    name: Publish R&D preview
+    name: Publish live Mirror candidate
     environment:
       name: mirror-rd-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-24.04
     needs: build
     steps:
-      - name: Deploy mirror preview
+      - name: Deploy live Mirror candidate
         id: deployment
         uses: actions/deploy-pages@v5.0.1
+
+  verify-live:
+    name: Verify live Mirror pages
+    runs-on: ubuntu-24.04
+    needs: deploy
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: ./.github/actions/node-project-setup
+
+      - name: Verify live release manifest and static routes
+        id: live_routes
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://datanest-supository.github.io/Mirror-DataNest"
+          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/mirror-release.json" -o /tmp/mirror-release.json
+          grep -q "\"commit\":\"$GITHUB_SHA\"" /tmp/mirror-release.json
+          for route in "" legal governance accessibility terms privacy disclaimers acceptable-use intellectual-property; do
+            suffix=""
+            if [ -n "$route" ]; then suffix="$route/"; fi
+            curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/$suffix" -o "/tmp/mirror-${route:-home}.html"
+            grep -qi "<html" "/tmp/mirror-${route:-home}.html"
+          done
+          for app in career-compass creative-studio epublisher lyricsync-studio scene-song-spark sovereign-forge syncvision; do
+            curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/apps/$app/" -o "/tmp/$app.html"
+            grep -qi "<html" "/tmp/$app.html"
+          done
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run live visual and functional browser tests
+        id: browser_tests
+        continue-on-error: true
+        env:
+          PLAYWRIGHT_BASE_URL: https://datanest-supository.github.io
+          DATANEST_APP_PATH: /Mirror-DataNest/
+        run: >
+          npx playwright test
+          tests/browser/auth.smoke.spec.ts
+          tests/browser/home-optimization.spec.ts
+          tests/browser/products.spec.ts
+          tests/browser/external-auditor.spec.ts
+          tests/browser/legal-centre.spec.ts
+          tests/browser/datanest-ai-layout.spec.ts
+          tests/browser/transcheduler-project-gantt.spec.ts
+
+      - name: Write live Mirror verification evidence
+        if: always()
+        shell: bash
+        env:
+          ROUTE_OUTCOME: ${{ steps.live_routes.outcome }}
+          BROWSER_OUTCOME: ${{ steps.browser_tests.outcome }}
+        run: |
+          jq -n \
+            --arg schemaVersion "mirror-live-verification-v1" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg commit "$GITHUB_SHA" \
+            --arg liveUrl "https://datanest-supository.github.io/Mirror-DataNest/" \
+            --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg routeOutcome "$ROUTE_OUTCOME" \
+            --arg browserOutcome "$BROWSER_OUTCOME" \
+            --arg generatedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              schemaVersion:$schemaVersion,
+              repository:$repository,
+              commit:$commit,
+              liveUrl:$liveUrl,
+              workflowRun:$workflowRun,
+              visualFunctionalEvidence:{routeVerification:$routeOutcome,browserTests:$browserOutcome},
+              authority:{certification:false,canonicalDeployment:false},
+              generatedAt:$generatedAt
+            }' > mirror-live-verification.json
+
+      - name: Upload Mirror governance evidence
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: mirror-live-evidence-${{ github.run_id }}-${{ github.sha }}
+          path: |
+            mirror-live-verification.json
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Fail closed when live verification fails
+        if: always()
+        shell: bash
+        env:
+          ROUTE_OUTCOME: ${{ steps.live_routes.outcome }}
+          BROWSER_OUTCOME: ${{ steps.browser_tests.outcome }}
+        run: |
+          test "$ROUTE_OUTCOME" = "success"
+          test "$BROWSER_OUTCOME" = "success"
