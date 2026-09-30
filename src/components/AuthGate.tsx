@@ -224,7 +224,7 @@ export default function AuthGate() {
           <h1>{DATANEST_CANONICAL_NAME}</h1>
           <div className="bootRow">
             <div className="bootPulse" aria-hidden="true" />
-            <p className="lede">Checking your secure DataNest session…</p>
+            <p className="lede">Securing your workspace…</p><p className="startupHint">Verifying the protected DataNest session and preparing your R&D workspace.</p>
           </div>
           <noscript>
             <p className="authMessage">JavaScript is required to sign in at {DATANEST_PUBLIC_URL}.</p>
@@ -318,7 +318,7 @@ export default function AuthGate() {
       <section className="authCard landingSignIn" aria-labelledby="sign-in-title">
         <ResonanceBrandLockup />
         <h1 id="sign-in-title">{DATANEST_CANONICAL_NAME}</h1>
-        <p className="lede">Single-owner development workspace. Sign in to continue.</p>
+        <p className="lede">Single-owner development workspace.</p><p className="startupHint">Use your password, or choose a secure email link if you need another sign-in method.</p>
 
         <form onSubmit={signIn} className="authForm" aria-busy={busy}>
           <label>
@@ -358,7 +358,7 @@ export default function AuthGate() {
         <div className="authMessageSlot" aria-live="polite" role="status">
           {message && <div className="authMessage">{message}</div>}
         </div>
-        <p className="securityNote">Owner access only · iace1236912@gmail.com</p>
+        <p className="securityNote">Owner access only · authorized account required.</p>
       </section>
       </div>
       <PlatformFooter compact />
