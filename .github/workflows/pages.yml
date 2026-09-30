@@ -161,15 +161,36 @@ jobs:
         run: |
           set -euo pipefail
           base="https://datanest-supository.github.io/Mirror-DataNest"
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/mirror-release.json" -o /tmp/mirror-release.json
+          fetch_after_pages_propagation() {
+            local url="$1"
+            local output="$2"
+            local attempts=18
+            for attempt in $(seq 1 "$attempts"); do
+              if curl --fail --silent --show-error --location --retry 2 --retry-delay 2 --retry-all-errors "$url" -o "$output"; then
+                return 0
+              fi
+              if [ "$attempt" -lt "$attempts" ]; then
+                sleep 5
+              fi
+            done
+            echo "::error::Mirror Pages resource did not become reachable after Pages propagation retries: $url"
+            return 1
+          }
+
+          fetch_after_pages_propagation "$base/mirror-release.json" /tmp/mirror-release.json
           grep -q "\"commit\":\"$GITHUB_SHA\"" /tmp/mirror-release.json
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/release-manifest.json" -o /tmp/release-manifest.json
+          fetch_after_pages_propagation "$base/release-manifest.json" /tmp/release-manifest.json
           grep -q '"projectInvitations":"send-project-member-invite@3"' /tmp/release-manifest.json
-          # GitHub Pages serves the static shell/manifests here; application route
-          # reachability is verified by the live Playwright suite below. Do not
-          # require every client-side route to exist as a standalone server path.
-          curl --fail --silent --show-error --location --retry 8 --retry-delay 3 --retry-all-errors "$base/" -o /tmp/mirror-home.html
-          grep -qi "<html" /tmp/mirror-home.html
+          for route in "" legal governance accessibility terms privacy disclaimers acceptable-use intellectual-property; do
+            suffix=""
+            if [ -n "$route" ]; then suffix="$route/"; fi
+            fetch_after_pages_propagation "$base/$suffix" "/tmp/mirror-${route:-home}.html"
+            grep -qi "<html" "/tmp/mirror-${route:-home}.html"
+          done
+          for app in career-compass creative-studio epublisher lyricsync-studio scene-song-spark sovereign-forge syncvision; do
+            fetch_after_pages_propagation "$base/apps/$app/" "/tmp/$app.html"
+            grep -qi "<html" "/tmp/$app.html"
+          done
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
