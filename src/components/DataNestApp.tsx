@@ -143,24 +143,24 @@ type CommandItem =
 const viewKeys = new Set<ViewKey>(nav.map(item=>item.key));
 
 const viewDescriptions:Record<ViewKey,string> = {
-  dashboard:"Live operational dashboard across work, execution, governance, AI optimization, controls and evidence.",
-  overview:"Human intent and governed AI collaboration at a glance.",
+  dashboard:"Live owner R&D cockpit across products, experiments, candidate deployment, runtime and evidence.",
+  overview:"Owner R&D home for Resonance DataNest development, experimentation and candidate shipping.",
   stakeholder:"Capture stakeholder input and review contribution context.",
   sparks:SPARKS_WORKSPACE_DESCRIPTION,
   impact:"Live input quality, verification acceptance, impact points, and the project areas your work affects.",
   governance:"Review sovereign governance controls and decisions.",
-  products:"Inspect governed Resonance products, their architecture, controls, evidence, risks and promotion branches.",
+  products:"Evolve the Resonance product portfolio, related tools, architecture and candidate branches.",
   external_auditor:"Assess external projects and products with evidence-linked findings, ISO-aware traceability, governed AI analysis, and reviewed optimization handoff.",
   thinktank:"Coordinate structured research and collaborative thinking.",
-  ai:"Work with governed DataNest AI memory and project context.",
+  ai:"Develop with DataNest AI, project memory and owner-directed experimentation.",
   productlab:"Test and review product surfaces before release.",
   unifi:"Plan complete, traceable Job Manifests before execution.",
-  scheduler:"Manage project work in queue or Gantt chart context with live capability-aware scheduling.",
+  scheduler:"Prepare and monitor independent Mirror candidate deployment with live capability-aware scheduling.",
   runs:"Review execution history and connector outcomes.",
   checkpoints:"Resume project work from durable continuation points.",
   audit:"Inspect immutable operational events and traceability.",
   transparency:"Review published audit methodology, evidence, and findings.",
-  settings:"Manage project, tool, AI administration, and scheduler policy."
+  settings:"Manage owner access, R&D controls, runtime administration and candidate policies."
 };
 
 type WorkspaceTaskGuide = { start:string; complete:string; evidence:string };
@@ -1774,49 +1774,72 @@ export default function DataNestApp({session}:{session:Session}) {
 }
 
 function Overview({project,tools,jobs,counts,setView,canOperate}:{project:Project;tools:Tool[];jobs:Job[];counts:Summary;setView:(v:ViewKey)=>void;canOperate:boolean}) {
-  const workspaces:Array<{key:ViewKey;label:string;description:string;glyph:string}> = [
-    {key:"products",label:"Products",description:"Inspect governed products, linked architecture, controls, evidence and specialist experiences.",glyph:"◉"},
-    {key:"ai",label:"DataNest AI",description:"Governed project memory and AI collaboration.",glyph:"⌬"},
-    {key:"unifi",label:"UNIFI Planner",description:"Prepare complete, traceable Job Manifests.",glyph:"◇"},
-    {key:"scheduler",label:"TranScheduler",description:"Route work through capability-aware scheduling.",glyph:"⌁"},
-    {key:"stakeholder",label:"Stakeholder",description:"Capture and review stakeholder contributions.",glyph:"✦"},
-    {key:"sparks",label:"Sparks",description:"Develop early ideas into project inputs.",glyph:"✧"},
-    {key:"governance",label:"Governance",description:"Review controls, decisions, and accountability.",glyph:"◆"},
-    {key:"thinktank",label:"Think Tanks",description:"Coordinate structured collaborative research.",glyph:"◈"},
-    {key:"productlab",label:"Product Lab",description:"Review and test product surfaces before release.",glyph:"▣"},
-    {key:"transparency",label:"Transparency",description:"Inspect audit evidence, methodology, and findings.",glyph:"◎"}
+  const developmentSurfaces:Array<{key:ViewKey;label:string;description:string;glyph:string}> = [
+    {key:"ai",label:"DataNest AI",description:"Shape product intent, prototypes and owner-directed AI experiments.",glyph:"✦"},
+    {key:"sparks",label:"Experiments",description:"Capture ideas, test hypotheses and evolve promising product directions.",glyph:"✧"},
+    {key:"products",label:"Products & Tools",description:"Develop the Resonance portfolio and inspect product architecture and candidate branches.",glyph:"◉"},
+    {key:"productlab",label:"Product Lab",description:"Validate product surfaces, test builds and inspect pre-candidate evidence.",glyph:"▣"},
+    {key:"unifi",label:"Build Manifests",description:"Turn a development outcome into a complete executable build manifest.",glyph:"◇"},
+    {key:"scheduler",label:"Candidate Deploy",description:"Prepare and monitor an independent Mirror candidate deployment.",glyph:"⌁"},
+    {key:"runs",label:"Runtime",description:"Inspect candidate execution history, connector outcomes and live behavior.",glyph:"▶"},
+    {key:"audit",label:"Evidence",description:"Trace runtime, recovery and development evidence for owner-controlled review.",glyph:"≡"}
   ];
 
   return <>
     <section className="heroPanel">
       <div className="heroCopy">
-        <p className="eyebrow">PROJECT COMMAND CENTER</p>
+        <p className="eyebrow">OWNER R&amp;D HOME</p>
         <h2>{project.name}</h2>
-        <p>{project.description}</p>
+        <p>Single-owner development environment for Resonance DataNest and related products and tools. Build quickly, experiment freely, inspect live behavior, and ship independent Mirror candidates without collaborative-workspace overhead.</p>
         <div className="heroActions">
-          <button className="primaryButton compact" disabled={!canOperate} onClick={()=>setView("unifi")}>{canOperate ? "Create UNIFI job" : "Viewer mode"}</button>
+          <button className="primaryButton compact" disabled={!canOperate} onClick={()=>setView("unifi")}>{canOperate ? "Build a manifest" : "Owner controls unavailable"}</button>
+          <button className="secondaryButton compact" onClick={()=>setView("products")}>Open product portfolio</button>
           <button className="secondaryButton compact" onClick={()=>setView("ai")}>Open DataNest AI</button>
-          <button className="secondaryButton compact" onClick={()=>setView("scheduler")}>Open TranScheduler</button>
         </div>
       </div>
-
     </section>
 
-    <section className="metricGrid" aria-label="Project work summary">
-      <Metric label="Total jobs" value={counts.total} note="Project work units"/>
-      <Metric label="Active work" value={counts.active} note="Not in a final state"/>
-      <Metric label="Running" value={counts.running} note="Executing now"/>
-      <Metric label="Blocked" value={counts.blocked} note="Needs dependency or action"/>
+    <section className="metricGrid" aria-label="Owner R&D summary">
+      <Metric label="Development units" value={counts.total} note="Total work records" />
+      <Metric label="Active development" value={counts.active} note="Work not in a final state" />
+      <Metric label="Running now" value={counts.running} note="Candidate/runtime execution" />
+      <Metric label="Needs attention" value={counts.blocked} note="Blocked or waiting work" />
     </section>
 
-    <details className="workspaceSection quietDisclosure" aria-labelledby="workspace-heading">
-      <summary id="workspace-heading">Browse all workspaces</summary>
+    <section className="workspaceSection">
+      <div className="panelHead"><div><p className="eyebrow">DEVELOPMENT SURFACE</p><h3>Build the next Resonance product</h3></div><span className="countPill">{counts.available+" capabilities"}</span></div>
       <div className="workspaceGrid">
-        {workspaces.map(item=><button className="workspaceCard" type="button" key={item.key} onClick={()=>setView(item.key)}>
+        {developmentSurfaces.map(item=><button className="workspaceCard" type="button" key={item.key} onClick={()=>setView(item.key)}>
           <span className="workspaceGlyph" aria-hidden="true">{item.glyph}</span>
           <span><b>{item.label}</b><small>{item.description}</small></span>
           <span className="workspaceArrow" aria-hidden="true">→</span>
         </button>)}
+      </div>
+    </section>
+
+    <details className="panel quietDisclosure">
+      <summary>Governed handoff / compatibility surfaces</summary>
+      <div className="workspaceGrid">
+        <button className="workspaceCard" type="button" onClick={()=>setView("governance")}>
+          <span className="workspaceGlyph" aria-hidden="true">◆</span>
+          <span><b>Governed DataNest</b><small>Legacy/canonical governance surfaces retained for selective handoff; they are not the primary Mirror operating model.</small></span>
+          <span className="workspaceArrow" aria-hidden="true">→</span>
+        </button>
+        <button className="workspaceCard" type="button" onClick={()=>setView("stakeholder")}>
+          <span className="workspaceGlyph" aria-hidden="true">✦</span>
+          <span><b>Collaborative compatibility</b><small>Open retained collaborative routes only when preparing work for governed DataNest.</small></span>
+          <span className="workspaceArrow" aria-hidden="true">→</span>
+        </button>
+        <button className="workspaceCard" type="button" onClick={()=>setView("thinktank")}>
+          <span className="workspaceGlyph" aria-hidden="true">◈</span>
+          <span><b>Research handoff</b><small>Retained structured-research surfaces for compatibility with the governed environment.</small></span>
+          <span className="workspaceArrow" aria-hidden="true">→</span>
+        </button>
+        <button className="workspaceCard" type="button" onClick={()=>setView("transparency")}>
+          <span className="workspaceGlyph" aria-hidden="true">◎</span>
+          <span><b>Published evidence</b><small>Review canonical audit and transparency artifacts when validating a handoff.</small></span>
+          <span className="workspaceArrow" aria-hidden="true">→</span>
+        </button>
       </div>
     </details>
 
@@ -1828,14 +1851,10 @@ function Overview({project,tools,jobs,counts,setView,canOperate}:{project:Projec
     </details>
 
     <section className="panel">
-      <div className="panelHead"><div><p className="eyebrow">RECENT WORK</p><h3>Latest jobs</h3></div><button className="textButton" onClick={()=>setView("scheduler")}>Open queue</button></div>
+      <div className="panelHead"><div><p className="eyebrow">CURRENT DEVELOPMENT WORK</p><h3>Latest work</h3></div><button className="textButton" onClick={()=>setView("scheduler")}>Open candidate deploy</button></div>
       <JobTable jobs={jobs}/>
     </section>
   </>;
-}
-
-function Metric({label,value,note}:{label:string;value:number;note:string}) {
-  return <article className="metricCard"><span>{label}</span><strong>{value}</strong><small>{note}</small></article>;
 }
 
 type UnifiPendingPayload={
@@ -2564,4 +2583,3 @@ function Pagination({page,total,onPage}:{page:number;total:number;onPage:(p:numb
 
 function Badge({value}:{value:string}) { return <span className={"badge "+tone(value)}>{value.replaceAll("_"," ")}</span>; }
 function EmptyState({title,text,actionLabel,onAction}:{title:string;text:string;actionLabel?:string;onAction?:()=>void}) { return <div className="emptyState"><div>◇</div><h3>{title}</h3><p>{text}</p>{actionLabel&&onAction&&<button className="secondaryButton compact emptyStateAction" type="button" onClick={onAction}>{actionLabel}</button>}</div>; }
-
