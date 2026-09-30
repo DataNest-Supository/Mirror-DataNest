@@ -24,6 +24,7 @@ jobs:
       NEXT_PUBLIC_BASE_PATH: "/Mirror-DataNest"
       NEXT_PUBLIC_SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
+      DATANEST_SUPABASE_PROJECT: "qchttpcyqlqnhvahprhz"
       DATANEST_UI_RELEASE_SHA: ${{ github.sha }}
       DATANEST_UI_RELEASE_STATE: "candidate"
       NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
