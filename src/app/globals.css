@@ -5405,3 +5405,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .authForm[aria-busy="true"] .primaryButton::after{content:"";display:inline-block;width:10px;height:10px;margin-left:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:mirrorAuthSpin .7s linear infinite}
 @keyframes mirrorAuthSpin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.authForm[aria-busy="true"] .primaryButton::after{animation:none}}
+/* Accessible motion-control state */
+.motionControl[aria-pressed="true"]{border-color:rgba(66,231,255,.34);background:rgba(66,231,255,.07);color:#e9fbff}
+.motionControl:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;box-shadow:var(--focus-ring)}
+@media(max-width:650px){.motionControl{min-height:42px;padding-inline:12px}}
