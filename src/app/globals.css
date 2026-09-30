@@ -5386,3 +5386,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+
+/* Live auth UX refinement */
+.startupHint{margin:0;color:var(--text-secondary);font-size:11px;line-height:1.55;max-width:46ch}
+.authForm{gap:12px}
+.authForm label{display:grid;gap:7px}
+.authForm input{min-height:46px}
+.authForm .primaryButton{min-height:48px;font-weight:850}
+.authForm .secondaryButton{min-height:44px}
+.landingSignIn .securityNote{margin-top:14px}
