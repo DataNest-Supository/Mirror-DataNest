@@ -4,10 +4,10 @@ import { readFileSync } from "node:fs";
 
 const workflow = readFileSync(".github/workflows/sync-canonical.yml", "utf8");
 
-test("canonical refresh is event-driven with daily reconciliation", () => {
+test("canonical refresh is event-driven with hourly reconciliation fallback", () => {
   assert.match(workflow, /repository_dispatch:/);
   assert.match(workflow, /types: \[canonical-main-updated\]/);
-  assert.match(workflow, /cron: "17 2 \* \* \*"/);
+  assert.match(workflow, /cron: "17 \* \* \* \*"/);
 });
 
 test("canonical refresh uses immutable SHA-derived branch names without force pushes", () => {
