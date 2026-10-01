@@ -95,7 +95,7 @@ jobs:
           grep -Fq "$GITHUB_SHA" public/runtime-config.js
 
 
-      - name: Write production release manifestoduction release manifest
+      - name: Write production release manifest
         env:
           DATANEST_RELEASE_SHA: ${{ github.sha }}
           DATANEST_DB_RELEASE: "mirror-production-current"
