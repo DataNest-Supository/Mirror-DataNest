@@ -4,11 +4,11 @@
 >
 > Governed collaborative work for the canonical `/DataNest/` surface belongs in `DataNest-Supository/DataNest`. Mirror-DataNest is a peer production authority for `/Mirror-DataNest/` while remaining independently governed.
 
-- Live candidate UI: `https://datanest-supository.github.io/Mirror-DataNest/`
+- Live production UI: `https://datanest-supository.github.io/Mirror-DataNest/`
 - R&D policy: [`config/mirror-rd-policy.json`](config/mirror-rd-policy.json)
 - Production handoff: [`docs/PRODUCTION_CANDIDATE_HANDOFF.md`](docs/PRODUCTION_CANDIDATE_HANDOFF.md)
 - Machine policy: [`config/mirror-rd-policy.json`](config/mirror-rd-policy.json)
-- Functional backend: **DataNest AI Staging** · `qchttpcyqlqnhvahprhz`
+- Production backend: **Mirror DataNest isolated production** · `qchttpcyqlqnhvahprhz`
 
 ---
 
