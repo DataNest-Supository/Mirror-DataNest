@@ -38,8 +38,7 @@
         "do_not_enforce_on_create": false,
         "required_status_checks": [
           {
-            "context": "BRANCH-X Protection Tree",
-            "integration_id": -1
+            "context": "BRANCH-X Protection Tree"
           }
         ],
         "strict_required_status_checks_policy": true
