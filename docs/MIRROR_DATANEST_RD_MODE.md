@@ -17,7 +17,7 @@ Mirror is intentionally non-governed for experiment iteration, not non-evidenced
 - Pre-deployment test, type-check and dependency-audit results remain visible observations and do not block live experimentation.
 - Production-candidate packaging retains advisory test, type-check and audit outcomes. A live evidence reference is optional for owner R&D packaging; successful exact-candidate evidence and human review remain required for canonical production certification.
 - Canonical production remains a separate authority boundary. No Mirror workflow may deploy or overwrite the canonical DataNest Pages site, production backend, or governance state.
-- Canonical refresh is watched every 15 minutes and skipped when the current canonical main commit is already an ancestor of Mirror main.
+- Canonical refresh uses repository dispatch plus an hourly reconciliation fallback.
 
 This keeps the R&D loop fast while preserving the existing DataNest governance firewall: evidence can accelerate review, but Mirror cannot approve, ratify, certify, or deploy canonical production.
 
@@ -96,3 +96,8 @@ Canonical DataNest owner/admin users use **R&D Test Mode** to open the live Mirr
 ## Refreshing from canonical
 
 Mirror should periodically refresh from approved `DataNest/main` so R&D starts from the latest certified baseline. Production-candidate evidence should be retained before any destructive history cleanup.
+
+
+## FREETREE isolation
+
+FREETREE is a separate open-development repository target. It has no canonical refresh, reverse promotion, Knowledge feed exchange, Boundaries enforcement, or production authority. The Mirror bootstrap workflow creates it only with an explicit repository-administration token and strips synchronization workflows before the initial FREETREE commit.
