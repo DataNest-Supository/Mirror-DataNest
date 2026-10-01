@@ -1,6 +1,7 @@
 "use client";
 
 import OwnerDevelopmentAnalytics from "@/components/OwnerDevelopmentAnalytics";
+import HumanReviewPanel from "@/components/HumanReviewPanel";
 
 type HealthState = { state:"checking"|"online"|"degraded"|"offline"; checkedAt:string|null; message:string };
 type Summary = { total:number; active:number; running:number; blocked:number; available:number; registered:number };
@@ -61,6 +62,12 @@ export default function OwnerRDCockpit({
       <div className="panelHead"><div><p className="eyebrow">LIVE CANDIDATE CONTROL</p><h3>Current development work</h3></div><button className="textButton" onClick={()=>onNavigate("scheduler")}>Open candidate deploy</button></div>
       {jobs.length ? <div className="jobTable">{jobs.slice(0,6).map(job=><div className="jobTableRow" key={job.id}><b>JOB-{String(job.job_number).padStart(5,"0")}</b><div><strong>{job.title}</strong><small>P{job.priority}</small></div><span><span className={"badge "+job.status.toLowerCase()}>{job.status.replaceAll("_"," ")}</span></span></div>)}</div> : <div className="emptyState"><div>◇</div><h3>No active development work</h3><p>Start with DataNest AI, an experiment, or a build manifest.</p><button className="secondaryButton compact" onClick={()=>onNavigate("ai")}>Start with DataNest AI</button></div>}
     </section>
+
+    <HumanReviewPanel
+      repository="DataNest-Supository/DataNest"
+      pullRequestNumber={390}
+      expectedReviewer="ResonanceAppDev"
+    />
 
     <OwnerDevelopmentAnalytics projectId={projectId} compact />
 
