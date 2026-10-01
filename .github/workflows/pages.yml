@@ -331,7 +331,7 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Live routes: $ROUTE_OUTCOME"
             echo "- Browser tests: $BROWSER_OUTCOME"
-            echo "Mirror production evidence is authoritative for the Mirror surface; canonical `/DataNest/` release requires separate canonical review."
+            echo "Mirror production evidence is authoritative for the Mirror surface; canonical /DataNest/ release requires separate canonical review."
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$ROUTE_OUTCOME" != success ] || [ "$BROWSER_OUTCOME" != success ]; then
             echo "::warning::Mirror production deployment has unsuccessful live observations. Inspect the evidence artifact before canonical handoff."
