@@ -11,8 +11,7 @@ test("canonical refresh converges on one bot-owned latest branch", () => {
 });
 
 test("canonical refresh records exact lineage in the current PR", () => {
-  assert.match(workflow, /Canonical DataNest\/main: \$CANONICAL_SHA/);
-  assert.match(workflow, /Mirror main at refresh: \$MIRROR_SHA/);
+  assert.ok(workflow.includes("Exact lineage: canonical=$CANONICAL_SHA; mirror=$MIRROR_SHA."));
   assert.match(workflow, /Create or update current mirror refresh PR/);
 });
 
@@ -20,4 +19,10 @@ test("canonical refresh retires only superseded bot SHA branches", () => {
   assert.match(workflow, /select\(\.user\.login == "github-actions\[bot\]"\)/);
   assert.match(workflow, /\^sync\/canonical-main-\[0-9a-f\]\{12\}\$/);
   assert.match(workflow, /select\(\.number != \$current\)/);
+});
+
+test("canonical refresh keeps generated PR text inside the workflow run block", () => {
+  assert.doesNotMatch(workflow, /BODY="\$\(cat <<EOF/);
+  assert.ok(workflow.includes('BODY="Canonical DataNest/main moved.'));
+  assert.ok(workflow.includes("Exact lineage: canonical=$CANONICAL_SHA; mirror=$MIRROR_SHA."));
 });
