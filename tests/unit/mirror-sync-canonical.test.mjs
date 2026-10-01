@@ -25,5 +25,5 @@ test("canonical refresh retires only superseded bot SHA branches", () => {
 test("canonical refresh keeps generated PR text inside the workflow run block", () => {
   assert.doesNotMatch(workflow, /BODY="\$\(cat <<EOF/);
   assert.ok(workflow.includes('BODY="Canonical DataNest/main moved.'));
-  assert.ok(workflow.includes("$'\\n\\n'"));
+  assert.ok(workflow.includes("Exact lineage: canonical=$CANONICAL_SHA; mirror=$MIRROR_SHA."));
 });
