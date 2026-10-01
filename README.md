@@ -18,6 +18,7 @@
 ## Specialized R&D trees
 
 - **Knowledge consumer** — receives the Mirror-targeted provisional learning feed from canonical Knowledge on an isolated automation branch.
+- **BOTSQUAD consumer** — receives consolidated AI-only optimization, UX ease, UI-evolution, and function-evolution feeds on `automation/botsquad-inbox` for R&D implementation.
 - **AI Plugin Lab** — Mirror-only registry and read-only validation harness for Ollama, llama.cpp, vLLM, LocalAI, Hugging Face TGI, and generic OpenAI-compatible endpoints.
 - **FREETREE bootstrap** — provisions an isolated open-development snapshot with DataNest synchronization, promotion, Knowledge exchange, and Boundaries controls removed. Baseline credential/platform safety remains.
 
