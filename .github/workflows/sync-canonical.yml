@@ -85,7 +85,7 @@ jobs:
         run: |
           set -euo pipefail
           API_URL="https://api.github.com/repos/DataNest-Supository/Mirror-DataNest/pulls"
-          BODY="Canonical DataNest/main moved. This refreshes the R&D baseline only; Mirror-owned Actions workflows remain authoritative for Mirror execution and Pages publication."
+          BODY="Canonical DataNest/main moved. This refreshes the R&D baseline only; Mirror-owned Actions workflows remain authoritative for Mirror execution and Pages publication. Exact lineage: canonical=$CANONICAL_SHA; mirror=$MIRROR_SHA. The bot-owned $BRANCH branch is force-updated to the latest canonical snapshot so there is one current refresh PR instead of a queue of stale SHA-specific PRs."
 
           EXISTING="$(curl -fsSL             -H "Authorization: Bearer $GITHUB_TOKEN"             -H "Accept: application/vnd.github+json"             "$API_URL?state=open&head=DataNest-Supository:$BRANCH&base=main")"
 
