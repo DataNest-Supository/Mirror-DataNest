@@ -833,42 +833,48 @@ export default function DataNestApp({session}:{session:Session}) {
     setLoadingCore(true);
     setError("");
 
-    await Promise.all([
-      supabase.rpc("accept_pending_project_member_invites_v1"),
-      supabase.rpc("accept_pending_job_invites")
-    ]);
+    try {
+      await Promise.all([
+        supabase.rpc("accept_pending_project_member_invites_v1"),
+        supabase.rpc("accept_pending_job_invites")
+      ]);
 
-    const pResult=await supabase
-      .from("projects")
-      .select("id,slug,name,description,status,created_at")
-      .eq("slug","resonance-datanest")
-      .maybeSingle();
+      const pResult=await supabase
+        .from("projects")
+        .select("id,slug,name,description,status,created_at")
+        .eq("slug","resonance-datanest")
+        .maybeSingle();
 
-    if(pResult.error || !pResult.data) {
-      setError(pResult.error?.message || "You do not have access to reson8.datanest.life.");
+      if(pResult.error || !pResult.data) {
+        setProject(null);
+        setMembership(null);
+        setError(pResult.error?.message || "Your signed-in account cannot access this workspace. Check its project membership, then retry.");
+        return;
+      }
+
+      const p=pResult.data as Project;
+      setProject(p);
+
+      const [memberResult,toolResult,capabilityResult]=await Promise.all([
+        supabase.from("project_members").select("project_id,user_id,role,status").eq("project_id",p.id).eq("user_id",session.user.id).maybeSingle(),
+        supabase.from("tool_registry").select("id,tool_key,name,role,enabled,config").eq("project_id",p.id).order("name"),
+        supabase.from("capabilities").select("id,account_key,connector_kind,capability,state,observed_at,next_check_at,confidence,concurrency_limit,running,metadata").eq("project_id",p.id).order("account_key")
+      ]);
+
+      const firstError=memberResult.error||toolResult.error||capabilityResult.error;
+      if(firstError) setError(firstError.message);
+      else {
+        setMembership((memberResult.data||null) as ProjectMember|null);
+        setTools((toolResult.data||[]) as Tool[]);
+        setCapabilities((capabilityResult.data||[]) as Capability[]);
+      }
+
+      await Promise.all([loadSummary(p.id),loadRecentJobs(p.id),checkControlPlane(p.id)]);
+    } catch (coreError) {
+      setError(coreError instanceof Error ? coreError.message : "Unable to load this workspace. Please retry.");
+    } finally {
       setLoadingCore(false);
-      return;
     }
-
-    const p=pResult.data as Project;
-    setProject(p);
-
-    const [memberResult,toolResult,capabilityResult]=await Promise.all([
-      supabase.from("project_members").select("project_id,user_id,role,status").eq("project_id",p.id).eq("user_id",session.user.id).maybeSingle(),
-      supabase.from("tool_registry").select("id,tool_key,name,role,enabled,config").eq("project_id",p.id).order("name"),
-      supabase.from("capabilities").select("id,account_key,connector_kind,capability,state,observed_at,next_check_at,confidence,concurrency_limit,running,metadata").eq("project_id",p.id).order("account_key")
-    ]);
-
-    const firstError=memberResult.error||toolResult.error||capabilityResult.error;
-    if(firstError) setError(firstError.message);
-    else {
-      setMembership((memberResult.data||null) as ProjectMember|null);
-      setTools((toolResult.data||[]) as Tool[]);
-      setCapabilities((capabilityResult.data||[]) as Capability[]);
-    }
-
-    await Promise.all([loadSummary(p.id),loadRecentJobs(p.id),checkControlPlane(p.id)]);
-    setLoadingCore(false);
   },[session.user.id,loadSummary,loadRecentJobs,checkControlPlane]);
 
   const loadJobsPage=useCallback(async(page:number)=>{
@@ -1701,6 +1707,12 @@ export default function DataNestApp({session}:{session:Session}) {
           {error&&<div className="notice errorNotice" role="alert">{error}</div>}
         </div>
         {(loadingCore||loadingView)&&<div className="loadingBar" role="progressbar" aria-label="Loading DataNest data"><span/></div>}
+
+        {!loadingCore&&!project&&<section className="panel" aria-labelledby="workspace-access-title">
+          <h2 id="workspace-access-title">Workspace unavailable</h2>
+          <p className="muted">You are signed in. Once access or connectivity is restored, retry to load your workspace.</p>
+          <button className="primaryButton compact" type="button" onClick={()=>void loadCore()}>Retry workspace access</button>
+        </section>}
 
         {!loadingCore&&view!=="ai"&&workspaceTaskGuides[view]&&<section className="workspaceTaskGuide" aria-label={currentLabel+" task guide"}>
           <div>
