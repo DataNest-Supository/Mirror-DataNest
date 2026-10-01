@@ -29,6 +29,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [ ! -f knowledge/inbox/latest.json ]; then
+            echo "Canonical Knowledge feed has not been generated yet; nothing to publish."
+            exit 0
+          fi
           branch="automation/knowledge-inbox"
           git fetch origin "$branch" || true
           git switch -C "$branch"
