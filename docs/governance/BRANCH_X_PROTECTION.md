@@ -8,39 +8,10 @@ The repository-native workflow continuously verifies the policy and runs the uni
 
 ## Free host-level closure
 
-GitHub confirms that protected branches and repository rulesets are available on GitHub Free for public repositories. The remaining gap is administrative configuration, not a paid-plan requirement.
+GitHub confirms that repository rulesets and protected branches are available for public repositories on GitHub Free. citeturn718149search4turn718149search6
 
-Create a repository ruleset named **BRANCH-X Canonical** with enforcement set to **Active** and target patterns:
+Import `.github/rulesets/BRANCH-X-Canonical.json` and set it to **Active** for `main` and `release/**`. The definition enforces pull requests, one approval, stale-review dismissal, conversation resolution, the BRANCH-X status check, linear history, no force pushes, and no deletions.
 
-- `main`
-- `release/**`
+Import `.github/rulesets/BRANCH-X-Automation.json` and set it to **Active** for `automation/**`, `audit/**`, and `ci/**`. This host-level ruleset intentionally enforces only non-fast-forward and deletion protection so existing direct automation writes remain possible; BRANCH-X continues to require and verify the repository-native check for these branches.
 
-Configure these rules:
-
-- Require a pull request before merging.
-- Require at least 1 approving review.
-- Dismiss stale pull-request approvals when new commits are pushed.
-- Require conversation resolution before merging.
-- Require the `BRANCH-X Protection Tree` status check.
-- Require linear history.
-- Block force pushes.
-- Restrict deletions.
-- Do not configure any bypass actors unless an explicit governance exception is later approved.
-
-Create a second ruleset named **BRANCH-X Automation** for:
-
-- `automation/**`
-- `audit/**`
-- `ci/**`
-
-Configure it to block force pushes and deletions, require conversation resolution, and require the `BRANCH-X Protection Tree` status check.
-
-Leave ordinary development branches outside these rulesets.
-
-## Verification after configuration
-
-After saving the rulesets, verify that the repository exposes the active rulesets and that their target patterns and rules match `config/branch-protection.tree.json`.
-
-The BRANCH-X workflow should remain green. A missing or drifted native rule must continue to be treated as a protection gap rather than compliance.
-
-This repository is a Mirror control plane, so BRANCH-X governance artifacts remain local to the Mirror rather than asserting canonical DataNest authority. A missing GitHub-native protection configuration is published as a protection gap, not as compliance.
+No bypass actors are configured in either definition.
