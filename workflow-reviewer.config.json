@@ -8,8 +8,17 @@
     ".github/workflows",
     "docs",
     "knowledge",
-    "templates",
-    "botsquad"
+    "boundaries",
+    "botsquad",
+    "environment",
+    "enforcer",
+    "guardian",
+    "conductor",
+    "suggester",
+    "calmer",
+    "regulator",
+    "visibility-utility",
+    "liberty-in-all"
   ],
   "exclude": [
     "node_modules",
