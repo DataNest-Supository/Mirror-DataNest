@@ -1,4 +1,4 @@
-name: Mirror Production-Parity Candidate
+name: Mirror Production
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build production-parity Mirror
+    name: Build Mirror production
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -56,11 +56,11 @@ jobs:
         continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
 
-      - name: Record advisory pre-deployment observations
+      - name: Record pre-release observations
         if: always()
-        run: echo "Mirror pre-deployment observations are advisory and do not block Pages deployment."
+        run: echo "Mirror pre-release observations are advisory and do not block the Mirror production deployment."
 
-      - name: Validate isolated staging Supabase runtime values
+      - name: Validate isolated production Supabase runtime values
         env:
           SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
           SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
@@ -78,7 +78,7 @@ jobs:
             *) echo "::error::Mirror requires a Supabase publishable key."; exit 1 ;;
           esac
 
-      - name: Write isolated staging runtime configuration
+      - name: Write isolated production runtime configuration
         env:
           SUPABASE_URL: "https://qchttpcyqlqnhvahprhz.supabase.co"
           SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
@@ -95,7 +95,7 @@ jobs:
           grep -Fq "$GITHUB_SHA" public/runtime-config.js
 
 
-      - name: Write candidate release manifest
+      - name: Write production release manifest
         env:
           DATANEST_RELEASE_SHA: ${{ github.sha }}
           DATANEST_DB_RELEASE: "mirror-production-current"
@@ -140,7 +140,7 @@ jobs:
               observations:{unitTests:$unitTests,typeCheck:$typeCheck,dependencyAudit:$dependencyAudit},
               workflowRun:$workflowRun,
               authority:{productionSource:true,productionDeployment:true,productionBackend:true,canonicalDeployment:false,governance:false},
-              evidencePurpose:"Visual and functional testing of the exact production candidate before canonical certification.",
+              evidencePurpose:"Production release evidence for the exact Mirror surface; canonical certification remains separate.",
               generatedAt:$generatedAt
             }' > public/mirror-release.json
 
@@ -148,13 +148,13 @@ jobs:
           {"ok":true,"mode":"production","repository":"DataNest-Supository/Mirror-DataNest","commit":"$GITHUB_SHA","releaseId":"$release_id","canonicalRepository":"DataNest-Supository/DataNest","backend":"Mirror DataNest isolated production","supabaseProject":"qchttpcyqlqnhvahprhz","productionAuthority":true}
           EOF
 
-      - name: Build static production-parity site
+      - name: Build static Mirror production site
         run: npm run build
 
-      - name: Build DataNest-hosted RONSAS apps
+      - name: Build DataNest-hosted RONSAS production apps
         run: node scripts/build-ronsas-pages.mjs
 
-      - name: Validate complete isolated Mirror artifact
+      - name: Validate complete Mirror production artifact
         run: node scripts/validate-mirror-artifact.mjs out
 
       - uses: actions/upload-pages-artifact@v5.0.0
@@ -163,7 +163,7 @@ jobs:
           path: ./out
 
   deploy:
-    name: Publish live Mirror candidate
+    name: Publish live Mirror production
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     timeout-minutes: 10
     permissions:
@@ -179,12 +179,12 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Deploy live Mirror candidate
+      - name: Deploy live Mirror production
         id: deployment
         uses: actions/deploy-pages@v5.0.1
 
   verify-live:
-    name: Verify live Mirror pages
+    name: Verify live Mirror production
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     needs: deploy
@@ -229,7 +229,7 @@ jobs:
                 sleep 5
               fi
             done
-            echo "::error::Mirror Pages resource did not expose the expected candidate content after propagation retries: $url"
+            echo "::error::Mirror Pages resource did not expose the expected production content after propagation retries: $url"
             return 1
           }
 
@@ -248,7 +248,7 @@ jobs:
                 sleep 5
               fi
             done
-            echo "::error::Mirror Pages JSON resource did not expose the expected candidate value after propagation retries: $url"
+            echo "::error::Mirror Pages JSON resource did not expose the expected production value after propagation retries: $url"
             return 1
           }
 
@@ -334,5 +334,5 @@ jobs:
             echo "Mirror production evidence is authoritative for the Mirror surface; canonical `/DataNest/` release requires separate canonical review."
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$ROUTE_OUTCOME" != success ] || [ "$BROWSER_OUTCOME" != success ]; then
-            echo "::warning::Mirror deployed with unsuccessful live observations. Inspect the evidence artifact before handoff."
+            echo "::warning::Mirror production deployment has unsuccessful live observations. Inspect the evidence artifact before canonical handoff."
           fi
