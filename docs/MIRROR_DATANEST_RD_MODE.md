@@ -13,23 +13,23 @@ The Mirror has two linked jobs:
 
 Mirror is intentionally non-governed for experiment iteration, not non-evidenced for production promotion.
 
-- Pushes to main may publish a live candidate automatically so R&D can review the real rendered UI quickly.
-- Pre-deployment test, type-check and dependency-audit results remain visible observations and do not block live experimentation.
+- Pushes to main may publish the current Mirror production release automatically so R&D can review the real rendered UI quickly.
+- Pre-release test, type-check and dependency-audit results remain visible observations and do not block live experimentation.
 - Production releases retain exact-SHA evidence. The Mirror may release its own production surface directly; canonical production certification remains a separate path for changes intended for `/DataNest/`.
 - Mirror has independent production authority only over `/Mirror-DataNest/` and its isolated Supabase project. No Mirror workflow may deploy or overwrite `/DataNest/`, the canonical production backend, or canonical governance state.
 - Canonical refresh uses repository dispatch plus an hourly reconciliation fallback.
 
 This keeps the R&D loop fast while preserving the existing DataNest governance firewall: evidence can accelerate review, but Mirror cannot approve, ratify, certify, or deploy canonical production.
 
-## Live Mirror candidate
+## Live Mirror production
 
-Preferred public candidate identity:
+Preferred public production identity:
 
 `https://datanest-supository.github.io/Mirror-DataNest/`
 
-The sole Pages publisher is `.github/workflows/pages.yml`. It builds the current Mirror commit under the `/Mirror-DataNest` base path, validates staging runtime identity and all seven bundled apps, publishes `mirror-release.json`, then verifies the live routes and runs browser tests. Pull requests build and validate the artifact without deploying. Build and verification jobs have read-only repository permissions; only the main-branch deployment job has Pages/OIDC write permissions.
+The sole Pages publisher is `.github/workflows/pages.yml`. It builds the current Mirror commit under the `/Mirror-DataNest` base path, validates isolated production runtime identity and all seven bundled apps, publishes `mirror-release.json`, then verifies the live routes and runs browser tests. Pull requests build and validate the artifact without deploying. Build and verification jobs have read-only repository permissions; only the main-branch deployment job has Pages/OIDC write permissions.
 
-The release manifest contains an immutable commit identity, but its public URL always serves the latest candidate. Retain the workflow artifact for historical evidence. Browser JSON/HTML reports and a signed-out desktop screenshot accompany `mirror-live-verification.json` in the evidence artifact.
+The release manifest contains an immutable commit identity, but its public URL always serves the latest production release. Retain the workflow artifact for historical evidence. Browser JSON/HTML reports and a signed-out desktop screenshot accompany `mirror-live-verification.json` in the evidence artifact.
 
 The Mirror uses its isolated Supabase project (`qchttpcyqlqnhvahprhz`) as its own production backend. It is independent from the canonical production project `sgqdmfgjbprsoqsmgigi`.
 
@@ -39,7 +39,7 @@ The Mirror uses its isolated Supabase project (`qchttpcyqlqnhvahprhz`) as its ow
 - no human approval gate is required for experimental iteration;
 - failed experiments may remain traceable;
 - advisory checks support iteration;
-- a candidate intended for canonical production must obtain successful live Mirror evidence before canonical approval;
+- a change intended for canonical `/DataNest/` production must retain successful live Mirror evidence before canonical approval;
 - visual and functional review evidence is part of the production certification packet.
 
 ## Authority boundary
@@ -91,11 +91,11 @@ A Mirror production release is authoritative for the Mirror production surface. 
 
 ## DataNest admin toggle
 
-Canonical DataNest owner/admin users use **R&D Test Mode** to open the live Mirror UI. The control reads `mirror-release.json` and synchronizes the exact Mirror build into the existing Product Lab/governance evidence model, allowing reviewers to record versioned pass/fail/blocked evidence for the actual deployed candidate.
+Canonical DataNest owner/admin users use **R&D Test Mode** to open the live Mirror UI. The control reads `mirror-release.json` and synchronizes the exact Mirror build into the existing Product Lab/governance evidence model, allowing reviewers to record versioned pass/fail/blocked evidence for the actual deployed production release.
 
 ## Refreshing from canonical
 
-Mirror should periodically refresh from approved `DataNest/main` so R&D starts from the latest certified baseline. Production-candidate evidence should be retained before any destructive history cleanup.
+Mirror should periodically refresh from approved `DataNest/main` so R&D starts from the latest certified baseline. Production evidence should be retained before any destructive history cleanup.
 
 
 ## FREETREE isolation
