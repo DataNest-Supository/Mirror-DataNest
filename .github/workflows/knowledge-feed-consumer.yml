@@ -22,6 +22,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Prepare isolated Mirror Knowledge inbox
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="automation/knowledge-inbox"
+          git fetch origin "$branch" || true
+          git switch -C "$branch"
+
       - name: Consume canonical Knowledge feed
         run: node scripts/knowledge-feed-consumer.mjs
 
@@ -34,8 +42,6 @@ jobs:
             exit 0
           fi
           branch="automation/knowledge-inbox"
-          git fetch origin "$branch" || true
-          git switch -C "$branch"
           git add knowledge/inbox/latest.json
           if git diff --cached --quiet; then
             echo "Mirror Knowledge inbox unchanged."
