@@ -10,3 +10,6 @@
 /scripts/ @DataNest-Supository
 /tests/ @DataNest-Supository
 /docs/governance/ @DataNest-Supository
+
+/scripts/canonical-write-watchdog.mjs @DataNest-Supository
+/tests/unit/canonical-write-watchdog.test.mjs @DataNest-Supository
