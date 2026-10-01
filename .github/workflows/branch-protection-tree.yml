@@ -34,6 +34,9 @@ jobs:
 
       - name: Verify native ruleset contract unit test
         run: node --test tests/unit/branch-protection-ruleset-contract.test.mjs
+
+      - name: Verify native protection evidence contract
+        run: node --test tests/unit/native-protection-evidence.test.mjs
       - name: Verify BRANCH-X unit contract
         run: node --test tests/unit/branch-protection-tree.test.mjs
       - name: Verify canonical push semantics
