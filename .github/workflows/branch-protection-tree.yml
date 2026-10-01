@@ -29,6 +29,11 @@ jobs:
           fetch-depth: 0
       - name: Verify branch policy
         run: node scripts/branch-protection-tree.mjs
+      - name: Verify native ruleset import contract
+        run: node scripts/branch-protection-ruleset-contract.mjs
+
+      - name: Verify native ruleset contract unit test
+        run: node --test tests/unit/branch-protection-ruleset-contract.test.mjs
       - name: Verify BRANCH-X unit contract
         run: node --test tests/unit/branch-protection-tree.test.mjs
       - name: Verify canonical push semantics
