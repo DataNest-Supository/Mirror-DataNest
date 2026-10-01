@@ -19,4 +19,4 @@ for (const entry of ["index.html", ...mirrorAppSlugs.map(slug => "apps/" + slug 
   const file = statSync(resolve(root, entry));
   if (!file.isFile() || file.size === 0) throw new Error("Missing or empty Mirror page: " + entry);
 }
-console.log("Verified exact-SHA staging runtime, release manifests, and all seven bundled Mirror apps.");
+console.log("Verified exact-SHA Mirror production runtime, release manifests, and all seven bundled Mirror apps.");

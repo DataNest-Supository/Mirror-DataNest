@@ -10,7 +10,7 @@ export function validateMirrorRelease({ runtime, mirror, release, apps }, expect
   const candidate = policy.liveCandidate;
   assert.equal(runtime?.authoritative, true, "Mirror runtime must be authoritative.");
   assert.equal(runtime?.supabaseUrl, "https://" + candidate.backendProject + ".supabase.co",
-    "Mirror runtime must point to isolated staging.");
+    "Mirror runtime must point to its isolated production backend.");
   assert.match(runtime?.supabasePublishableKey || "", /^sb_publishable_\S+$/,
     "Mirror requires a public publishable key.");
   assert.equal(runtime?.releaseSha, expectedSha, "Runtime commit does not match the candidate.");
@@ -19,10 +19,11 @@ export function validateMirrorRelease({ runtime, mirror, release, apps }, expect
   assert.equal(mirror?.commit, expectedSha, "Mirror manifest commit does not match the candidate.");
   assert.equal(mirror?.publicUrl, candidate.publicUrl);
   assert.equal(mirror?.backend?.project, candidate.backendProject);
-  assert.equal(mirror?.backend?.mode, "isolated-staging");
-  for (const authority of ["productionSource", "canonicalDeployment", "governance"]) {
-    assert.equal(mirror?.authority?.[authority], false, "Mirror cannot claim " + authority + " authority.");
-  }
+  assert.equal(mirror?.backend?.mode, "isolated-production");
+  assert.equal(mirror?.authority?.productionSource, true, "Mirror production source authority is required.");
+  assert.equal(mirror?.authority?.productionDeployment, true, "Mirror production deployment authority is required.");
+  assert.equal(mirror?.authority?.productionBackend, true, "Mirror production backend authority is required.");
+  assert.equal(mirror?.authority?.canonicalDeployment, false, "Mirror cannot claim canonical deployment authority.");
   assert.equal(release?.frontendCommit, expectedSha, "Release manifest commit does not match the candidate.");
   assert.equal(release?.supabaseProject, candidate.backendProject);
   assert.equal(apps?.contract, "datanest-ronsas-apps@1");

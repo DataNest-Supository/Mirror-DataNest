@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 5,
-  "mode": "single-user-rnd",
+  "schemaVersion": 6,
+  "mode": "single-user-production-peer",
   "repository": "DataNest-Supository/Mirror-DataNest",
   "canonicalRepository": "DataNest-Supository/DataNest",
-  "purpose": "Private-feeling single-owner R&D workspace for developing Resonance DataNest and related products/tools, with live candidate testing independent of the governed collaborative repository.",
+  "purpose": "Single-owner R&D and production peer for Resonance DataNest, with independent production authority over the Mirror public surface and its isolated backend while preserving a non-overwriting relationship with canonical DataNest.",
   "owner": {
     "model": "single-user",
     "loginEmail": "iace1236912@gmail.com",
@@ -13,9 +13,18 @@
     "identityVisibility": "public-source"
   },
   "authority": {
+    "model": "peer-production-surface-authority-v1",
     "sourceOfTruth": false,
     "rndDevelopmentAuthority": true,
     "mirrorCandidateDeployment": true,
+    "productionAuthority": true,
+    "productionDeploymentAuthority": true,
+    "productionBackendAuthority": true,
+    "productionReleaseAuthority": true,
+    "scope": [
+      "https://datanest-supository.github.io/Mirror-DataNest/",
+      "Supabase:qchttpcyqlqnhvahprhz"
+    ],
     "canonicalProductionDeployment": false,
     "canonicalReleaseAuthority": false,
     "governanceAuthority": false
@@ -28,8 +37,8 @@
     "productionCandidateValidation": "hard-gated"
   },
   "boundaries": {
-    "productionBackendWritesAllowed": false,
-    "productionSecretsAllowed": false,
+    "productionBackendWritesAllowed": true,
+    "productionSecretsAllowed": true,
     "canonicalPagesDeploymentAllowed": false,
     "canonicalRepositoryDirectPushAllowed": false
   },
@@ -37,14 +46,16 @@
     "publicUrl": "https://datanest-supository.github.io/Mirror-DataNest/",
     "basePath": "/Mirror-DataNest",
     "backendProject": "qchttpcyqlqnhvahprhz",
-    "backendName": "DataNest AI Staging",
+    "environment": "production",
+    "backendName": "Mirror DataNest isolated production (Supabase:qchttpcyqlqnhvahprhz)",
+    "backendMode": "isolated-production",
     "releaseManifest": "mirror-release.json",
     "liveVerification": "mirror-live-verification.json",
-    "evidencePurpose": "Live R&D validation of the owner's current candidate."
+    "evidencePurpose": "Production release and live validation of the owner's current Mirror surface."
   },
   "relationship": {
     "upstream": "DataNest-Supository/DataNest",
-    "direction": "Mirror is an R&D laboratory; DataNest-Supository/DataNest is the governed collaborative repository.",
+    "direction": "Mirror and DataNest are peer production authorities for separate public surfaces; canonical synchronization supplies the certified baseline without transferring Mirror's own production authority.",
     "automaticCanonicalSync": true,
     "automaticReverseSync": false,
     "promotion": "Owner-controlled selective handoff only.",
@@ -56,6 +67,7 @@
     "preDeploymentChecks": "advisory",
     "liveCandidateReview": "owner-controlled",
     "productionCandidateEvidence": "required",
+    "productionAuthority": true,
     "canonicalProductionAuthority": false,
     "canonicalGovernanceAuthority": false,
     "productionCandidateChecks": "hard-gate"

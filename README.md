@@ -1,8 +1,8 @@
 # MIRROR-DATANEST — RESONANCE OWNER R&D WORKSPACE
 
-> **Single-owner development laboratory for Resonance DataNest and related products/tools.** Mirror-DataNest is intentionally separate from the governed collaborative repository and is optimized for rapid owner-led development, experimentation, testing and live candidate deployment.
+> **Single-owner development laboratory for Resonance DataNest and related products/tools.** Mirror-DataNest is intentionally separate from the governed collaborative repository and is optimized for rapid owner-led development, experimentation, testing and independent production deployment of the Mirror public surface.
 >
-> Governed collaborative work belongs in `DataNest-Supository/DataNest`. Mirror-DataNest is not its governance authority, but it is the owner's primary R&D surface for evolving the product ecosystem.
+> Governed collaborative work for the canonical `/DataNest/` surface belongs in `DataNest-Supository/DataNest`. Mirror-DataNest is a peer production authority for `/Mirror-DataNest/` while remaining independently governed.
 
 - Live candidate UI: `https://datanest-supository.github.io/Mirror-DataNest/`
 - R&D policy: [`config/mirror-rd-policy.json`](config/mirror-rd-policy.json)
@@ -12,7 +12,7 @@
 
 ---
 
-**Operating rule:** Mirror-DataNest is the owner's build/test/deploy laboratory. Candidate work can be developed and deployed here without collaborative-review gates. When work is ready for governed collaboration or canonical production release, the owner selectively hands it off to `DataNest-Supository/DataNest`, where the existing governance and release controls remain authoritative.
+**Operating rule:** Mirror-DataNest is the owner's build/test/deploy and production surface for `/Mirror-DataNest/`. Changes intended for the canonical `/DataNest/` production surface are selectively handed off to `DataNest-Supository/DataNest`, where canonical controls remain authoritative.
 
 
 ## Specialized R&D trees
