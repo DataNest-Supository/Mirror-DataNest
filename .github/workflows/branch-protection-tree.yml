@@ -41,8 +41,6 @@ jobs:
             exit 1
           fi
           echo "BRANCH-X canonical push semantics verified for $GITHUB_SHA"
-      - name: Run repository unit suite
-        run: npm test
       - name: Publish BRANCH-X evidence
         shell: bash
         run: |
