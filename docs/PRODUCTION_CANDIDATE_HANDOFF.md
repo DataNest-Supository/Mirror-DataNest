@@ -1,6 +1,6 @@
-# Mirror production-candidate handoff
+# Mirror production-candidate handoff and peer-production boundary
 
-Mirror is an owner-controlled R&D laboratory. Its deployment and observation results do not grant canonical production authority.
+Mirror is an owner-controlled R&D and production peer. Its own `/Mirror-DataNest/` production deployment is authoritative for that surface; this document governs the separate handoff path into canonical `/DataNest/` production.
 
 ## Owner-selected packaging
 
@@ -14,9 +14,9 @@ Unit tests, type checking and dependency auditing are advisory inside Mirror, in
 
 The shared base must belong to both canonical DataNest/main history and the candidate's history. The patch, changed-file list and diff statistics use the same exclusion list in `scripts/lib/mirror-candidate-pathspec.mjs`. Mirror workflow/action configuration, coordination records, staging-only migrations and Mirror-only verification tools are excluded. Application changes still need canonical review for staging URLs, owner-only behavior and environment-specific assumptions.
 
-## Canonical production review
+## Canonical production review for the DataNest surface
 
-Import the candidate into a `mirror-promotion/*` branch in `DataNest-Supository/DataNest`. Before canonical deployment:
+Import the candidate into a `mirror-promotion/*` branch in `DataNest-Supository/DataNest`. Before canonical deployment of the separate `/DataNest/` surface:
 
 - retain successful route/browser evidence for the exact candidate and human visual/functional review as applicable;
 - run canonical validation and Audit Optimizer review;
@@ -24,7 +24,7 @@ Import the candidate into a `mirror-promotion/*` branch in `DataNest-Supository/
 - obtain governance and human reviewer approval;
 - deploy the approved canonical SHA through DataNest.
 
-Missing or failed Mirror observations must remain visible to canonical reviewers. A package or a green advisory workflow is not certification.
+Missing or failed Mirror observations must remain visible to canonical reviewers. A package or a green advisory workflow does not authorize the separate canonical `/DataNest/` surface. Mirror's own production authority is already established by its peer-production contract and exact release evidence.
 
 ## Evidence
 

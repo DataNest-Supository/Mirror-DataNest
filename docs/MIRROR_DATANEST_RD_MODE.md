@@ -1,13 +1,13 @@
-# MIRROR-DATANEST R&D + Production-Parity Test Mode
+# MIRROR-DATANEST R&D + Production Authority Mode
 
-`DataNest-Supository/Mirror-DataNest` is the fast, ungated R&D clone and live production-parity candidate environment for the canonical `DataNest-Supository/DataNest` repository.
+`DataNest-Supository/Mirror-DataNest` is the fast, owner-controlled R&D workspace and independent production environment for the canonical `DataNest-Supository/DataNest` repository.
 
 ## Purpose
 
 The Mirror has two linked jobs:
 
 1. allow rapid R&D without canonical production approval gates on every experiment;
-2. deploy the selected candidate as a real public Mirror UI so humans and browser automation can test the actual rendered pages before certification.
+2. deploy the current Mirror build as a real public production UI so humans and browser automation can exercise the exact deployed release.
 
 ## Fast-lane R&D contract
 
@@ -15,8 +15,8 @@ Mirror is intentionally non-governed for experiment iteration, not non-evidenced
 
 - Pushes to main may publish a live candidate automatically so R&D can review the real rendered UI quickly.
 - Pre-deployment test, type-check and dependency-audit results remain visible observations and do not block live experimentation.
-- Production-candidate packaging retains advisory test, type-check and audit outcomes. A live evidence reference is optional for owner R&D packaging; successful exact-candidate evidence and human review remain required for canonical production certification.
-- Canonical production remains a separate authority boundary. No Mirror workflow may deploy or overwrite the canonical DataNest Pages site, production backend, or governance state.
+- Production releases retain exact-SHA evidence. The Mirror may release its own production surface directly; canonical production certification remains a separate path for changes intended for `/DataNest/`.
+- Mirror has independent production authority only over `/Mirror-DataNest/` and its isolated Supabase project. No Mirror workflow may deploy or overwrite `/DataNest/`, the canonical production backend, or canonical governance state.
 - Canonical refresh uses repository dispatch plus an hourly reconciliation fallback.
 
 This keeps the R&D loop fast while preserving the existing DataNest governance firewall: evidence can accelerate review, but Mirror cannot approve, ratify, certify, or deploy canonical production.
@@ -31,7 +31,7 @@ The sole Pages publisher is `.github/workflows/pages.yml`. It builds the current
 
 The release manifest contains an immutable commit identity, but its public URL always serves the latest candidate. Retain the workflow artifact for historical evidence. Browser JSON/HTML reports and a signed-out desktop screenshot accompany `mirror-live-verification.json` in the evidence artifact.
 
-The Mirror uses **DataNest AI Staging** (`qchttpcyqlqnhvahprhz`) for functional testing. Production backend writes are not the default R&D mechanism.
+The Mirror uses its isolated Supabase project (`qchttpcyqlqnhvahprhz`) as its own production backend. It is independent from the canonical production project `sgqdmfgjbprsoqsmgigi`.
 
 ## Inside the Mirror
 
@@ -46,18 +46,18 @@ The Mirror uses **DataNest AI Staging** (`qchttpcyqlqnhvahprhz`) for functional 
 
 Mirror-DataNest **may**:
 
-- deploy its own public production-parity candidate UI;
-- run functional tests against isolated staging;
-- produce exact-SHA release/test evidence;
-- package production candidates.
+- deploy and operate its own public production UI;
+- write only to its isolated production backend;
+- publish exact-SHA production releases and evidence;
+- package candidates for the canonical `/DataNest/` surface;
+- maintain its own owner-controlled production release authority.
 
 Mirror-DataNest **may not**:
 
 - deploy or overwrite `https://datanest-supository.github.io/DataNest/`;
-- become canonical source authority by implication;
-- write to the canonical production database by default;
-- approve governance;
-- certify itself;
+- write to the canonical production database;
+- alter canonical governance without the canonical repository's controls;
+- claim authority over the `/DataNest/` production surface;
 - merge directly into `DataNest/main`.
 
 ## Certification flow
@@ -87,7 +87,7 @@ DataNest/main
 canonical live deployment
 ```
 
-A passing Mirror candidate is evidence, not certification.
+A Mirror production release is authoritative for the Mirror production surface. It is still evidence—not certification—for the separate canonical `/DataNest/` surface.
 
 ## DataNest admin toggle
 

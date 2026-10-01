@@ -16,8 +16,8 @@ function fixture() {
     mirror: {
       schemaVersion: "mirror-live-release-v1", repository: policy.repository,
       commit: sha, publicUrl: policy.liveCandidate.publicUrl,
-      backend: { project: policy.liveCandidate.backendProject, mode: "isolated-staging" },
-      authority: { productionSource: false, canonicalDeployment: false, governance: false }
+      backend: { project: policy.liveCandidate.backendProject, mode: "isolated-production" },
+      authority: { productionSource: true, productionDeployment: true, productionBackend: true, canonicalDeployment: false, governance: false }
     },
     release: { frontendCommit: sha, supabaseProject: policy.liveCandidate.backendProject },
     apps: {
@@ -37,6 +37,8 @@ for (const [name, mutate] of [
   ["stale Mirror manifest", value => { value.mirror.commit = "b".repeat(40); }],
   ["stale release manifest", value => { value.release.frontendCommit = "b".repeat(40); }],
   ["production release backend", value => { value.release.supabaseProject = "sgqdmfgjbprsoqsmgigi"; }],
+  ["missing production deployment authority", value => { value.mirror.authority.productionDeployment = false; }],
+  ["missing production backend authority", value => { value.mirror.authority.productionBackend = false; }],
   ["canonical deployment claim", value => { value.mirror.authority.canonicalDeployment = true; }],
   ["missing app", value => { value.apps.apps.pop(); }],
   ["duplicate app", value => { value.apps.apps[0] = value.apps.apps[1]; }],

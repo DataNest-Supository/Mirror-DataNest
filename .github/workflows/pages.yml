@@ -26,7 +26,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_spZZYssbgfnC0qecAPLPVQ_ZqAyugqS"
       DATANEST_SUPABASE_PROJECT: "qchttpcyqlqnhvahprhz"
       DATANEST_UI_RELEASE_SHA: ${{ github.sha }}
-      DATANEST_UI_RELEASE_STATE: "candidate"
+      DATANEST_UI_RELEASE_STATE: "production"
       NEXT_PUBLIC_DATANEST_MIRROR_RD_MODE: "true"
       MIRROR_PUBLIC_URL: "https://datanest-supository.github.io/Mirror-DataNest/"
       DATANEST_EDGE_AI: datanest-ai-chat@2
@@ -71,7 +71,7 @@ jobs:
           test -n "$SUPABASE_PUBLISHABLE_KEY"
           case "$SUPABASE_URL" in
             https://qchttpcyqlqnhvahprhz.supabase.co) ;;
-            *) echo "::error::Mirror must use the DataNest AI Staging Supabase project."; exit 1 ;;
+            *) echo "::error::Mirror must use its dedicated isolated production Supabase project."; exit 1 ;;
           esac
           case "$SUPABASE_PUBLISHABLE_KEY" in
             sb_publishable_*) ;;
@@ -98,7 +98,7 @@ jobs:
       - name: Write candidate release manifest
         env:
           DATANEST_RELEASE_SHA: ${{ github.sha }}
-          DATANEST_DB_RELEASE: "staging-certification-current"
+          DATANEST_DB_RELEASE: "mirror-production-current"
           DATANEST_SUPABASE_PROJECT: "qchttpcyqlqnhvahprhz"
         run: node scripts/write-release-manifest.mjs public/release-manifest.json
 
@@ -113,7 +113,7 @@ jobs:
           release_id="mirror-${GITHUB_RUN_NUMBER}-$short_sha"
           jq -n \
             --arg schemaVersion "mirror-live-release-v1" \
-            --arg mode "production-parity-candidate" \
+            --arg mode "production" \
             --arg repository "$GITHUB_REPOSITORY" \
             --arg commit "$GITHUB_SHA" \
             --arg releaseId "$release_id" \
@@ -121,7 +121,7 @@ jobs:
             --arg canonicalRepository "DataNest-Supository/DataNest" \
             --arg canonicalPublicUrl "https://datanest-supository.github.io/DataNest/" \
             --arg backendProject "qchttpcyqlqnhvahprhz" \
-            --arg backendMode "isolated-staging" \
+            --arg backendMode "isolated-production" \
             --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --arg unitTests "$UNIT_TESTS" \
             --arg typeCheck "$TYPE_CHECK" \
@@ -139,13 +139,13 @@ jobs:
               backend:{project:$backendProject,mode:$backendMode},
               observations:{unitTests:$unitTests,typeCheck:$typeCheck,dependencyAudit:$dependencyAudit},
               workflowRun:$workflowRun,
-              authority:{productionSource:false,canonicalDeployment:false,governance:false},
+              authority:{productionSource:true,productionDeployment:true,productionBackend:true,canonicalDeployment:false,governance:false},
               evidencePurpose:"Visual and functional testing of the exact production candidate before canonical certification.",
               generatedAt:$generatedAt
             }' > public/mirror-release.json
 
           cat > public/mirror-rd.json <<EOF
-          {"ok":true,"mode":"production-parity-candidate","repository":"DataNest-Supository/Mirror-DataNest","commit":"$GITHUB_SHA","releaseId":"$release_id","canonicalRepository":"DataNest-Supository/DataNest","backend":"DataNest AI Staging","productionAuthority":false}
+          {"ok":true,"mode":"production","repository":"DataNest-Supository/Mirror-DataNest","commit":"$GITHUB_SHA","releaseId":"$release_id","canonicalRepository":"DataNest-Supository/DataNest","backend":"Mirror DataNest isolated production","supabaseProject":"qchttpcyqlqnhvahprhz","productionAuthority":true}
           EOF
 
       - name: Build static production-parity site
@@ -255,7 +255,7 @@ jobs:
           fetch_until_json_value "$base/mirror-release.json" /tmp/mirror-release.json '.commit == $expected' "$GITHUB_SHA"
           fetch_until_json_value "$base/release-manifest.json" /tmp/release-manifest.json '.frontendCommit == $expected' "$GITHUB_SHA"
           jq -e '.supabaseProject == "qchttpcyqlqnhvahprhz" and .edgeFunctions.projectInvitations == "send-project-member-invite@3"' /tmp/release-manifest.json >/dev/null
-          jq -e '.backend.project == "qchttpcyqlqnhvahprhz" and .authority.canonicalDeployment == false' /tmp/mirror-release.json >/dev/null
+          jq -e '.backend.project == "qchttpcyqlqnhvahprhz" and .backend.mode == "isolated-production" and .authority.productionSource == true and .authority.productionDeployment == true and .authority.productionBackend == true and .authority.canonicalDeployment == false' /tmp/mirror-release.json >/dev/null
           # GitHub Pages serves the static shell/manifests here; application route reachability
           # is verified by the live Playwright suite below. Do not require every client-side
           # route or app path to exist as a standalone server resource.
@@ -304,7 +304,7 @@ jobs:
               liveUrl:$liveUrl,
               workflowRun:$workflowRun,
               visualFunctionalEvidence:{routeVerification:$routeOutcome,browserTests:$browserOutcome},
-              authority:{certification:false,canonicalDeployment:false},
+              authority:{productionAuthority:true,certification:false,canonicalDeployment:false},
               generatedAt:$generatedAt
             }' > mirror-live-verification.json
 
@@ -331,7 +331,7 @@ jobs:
             echo "- Commit: $GITHUB_SHA"
             echo "- Live routes: $ROUTE_OUTCOME"
             echo "- Browser tests: $BROWSER_OUTCOME"
-            echo "Advisory R&D evidence; canonical release requires separate review."
+            echo "Mirror production evidence is authoritative for the Mirror surface; canonical `/DataNest/` release requires separate canonical review."
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$ROUTE_OUTCOME" != success ] || [ "$BROWSER_OUTCOME" != success ]; then
             echo "::warning::Mirror deployed with unsuccessful live observations. Inspect the evidence artifact before handoff."
