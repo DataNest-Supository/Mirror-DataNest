@@ -60,10 +60,11 @@ for(const failure of ["missing","service"] as const) {
     await page.goto(appPath);
 
     const retry=page.getByRole("button",{name:"Retry workspace access"});
+    const accessError=page.locator(".notice.errorNotice[role='alert']");
     const expectedError=failure==="missing"
       ?"Your signed-in account cannot access this workspace. Check its project membership, then retry."
       :"Workspace service temporarily unavailable";
-    await expect(page.getByRole("alert")).toHaveText(expectedError);
+    await expect(accessError).toHaveText(expectedError);
     await expect(page.getByRole("heading",{name:"Workspace unavailable"})).toBeVisible();
     await expect(retry).toBeEnabled();
     await expect(page.locator(".resonanceHome")).toHaveCount(0);
@@ -73,7 +74,7 @@ for(const failure of ["missing","service"] as const) {
     const initialReads=state.projectReads;
     await retry.click();
     await expect.poll(()=>state.projectReads).toBeGreaterThan(initialReads);
-    await expect(page.getByRole("alert")).toHaveText(expectedError);
+    await expect(accessError).toHaveText(expectedError);
     await expect(retry).toBeEnabled();
 
     state.visible=true;
@@ -81,7 +82,7 @@ for(const failure of ["missing","service"] as const) {
     await expect(page.locator(".resonanceHome")).toBeVisible();
     await expect(page.locator(".projectPill")).toContainText("Owner access fixture");
     await expect(page.getByText("Operator access",{exact:true})).toBeVisible();
-    await expect(page.getByRole("alert")).toHaveCount(0);
+    await expect(accessError).toHaveCount(0);
     await expect(retry).toHaveCount(0);
     expect(state.tableWrites).toEqual([]);
     expect(state.unexpectedBackends).toEqual([]);
