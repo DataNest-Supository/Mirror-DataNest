@@ -10,23 +10,36 @@ test("canonical refresh is event-driven with daily reconciliation", () => {
   assert.match(workflow, /cron: "17 2 \* \* \*"/);
 });
 
-test("canonical refresh uses immutable SHA-derived branch names", () => {
+test("canonical refresh uses immutable SHA-derived branch names without force pushes", () => {
   assert.match(workflow, /BRANCH="sync\/canonical-main-\$\{SHORT_CANONICAL\}-\$\{SHORT_MIRROR\}"/);
   assert.match(workflow, /git push origin "\$BRANCH"/);
   assert.doesNotMatch(workflow, /git push --force/);
-  assert.doesNotMatch(workflow, /checkout -B .*canonical\/main/);
+  assert.match(workflow, /git ls-remote --exit-code --heads origin "\$BRANCH"/);
 });
 
-test("canonical refresh uses the machine-readable boundary contract", () => {
+test("canonical refresh synchronizes canonical-owned boundary controls explicitly", () => {
   assert.match(workflow, /config\/repository-boundary\.json/);
+  assert.match(workflow, /scripts\/lib\/repository-boundary\.mjs/);
+  assert.match(workflow, /scripts\/validate-mirror-candidate-boundary\.mjs/);
   assert.match(workflow, /scripts\/lib\/sync-canonical-files\.mjs/);
-  assert.match(workflow, /Only paths classified as promotable/);
 });
 
-test("canonical refresh records exact lineage and retires superseded SHA branches", () => {
-  assert.match(workflow, /Canonical DataNest\/main refresh/);
-  assert.match(workflow, /Canonical SHA/);
-  assert.match(workflow, /Mirror main refresh base/);
-  assert.match(workflow, /\^sync\/canonical-main-\[0-9a-f\]\{12\}-\[0-9a-f\]\{7\}\$/);
-  assert.match(workflow, /state:"closed"/);
+test("canonical refresh records machine-readable selective-sync lineage", () => {
+  assert.match(workflow, /canonical-lineage\.json/);
+  assert.match(workflow, /mirror-canonical-lineage-v1/);
+  assert.match(workflow, /canonicalSha:\$canonicalSha/);
+  assert.match(workflow, /mirrorBaseSha:\$mirrorBaseSha/);
+  assert.match(workflow, /boundaryDigest:\$boundaryDigest/);
+});
+
+test("canonical refresh skips current lineage and reuses an existing exact-lineage PR", () => {
+  assert.match(workflow, /RECORDED_CANONICAL/);
+  assert.match(workflow, /Mirror already records current canonical SHA/);
+  assert.match(workflow, /state=open&head=DataNest-Supository:\$BRANCH&base=main/);
+  assert.match(workflow, /Create or reuse refresh PR/);
+});
+
+test("canonical refresh keeps generated PR body YAML-safe", () => {
+  assert.doesNotMatch(workflow, /BODY="\$\(cat <<EOF/);
+  assert.match(workflow, /BODY="Canonical DataNest\/main refresh\./);
 });
