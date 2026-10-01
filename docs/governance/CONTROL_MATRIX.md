@@ -19,4 +19,4 @@
 
 BRANCH-X is **not host-closed** until GitHub reports the expected native rulesets active and matching the policy. Repository-native controls remain the fail-closed verification layer.
 
-Current tracking: `DataNest-Supository/Mirror-DataNest#27`.
+Current tracking: `DataNest-Supository/DataNest#373`.
