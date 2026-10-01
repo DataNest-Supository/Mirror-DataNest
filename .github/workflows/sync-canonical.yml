@@ -132,7 +132,7 @@ jobs:
         run: |
           set -euo pipefail
           API_URL="https://api.github.com/repos/DataNest-Supository/Mirror-DataNest/pulls"
-          BODY="Canonical DataNest/main refresh. Exact lineage: canonical=$CANONICAL_SHA; Mirror refresh base=$MIRROR_SHA. Only canonical promotable paths plus canonical-owned boundary controls are synchronized. Mirror production authority remains false."
+          BODY="Canonical DataNest/main refresh. Exact lineage: canonical=$CANONICAL_SHA; Mirror refresh base=$MIRROR_SHA. Only canonical promotable paths plus canonical-owned boundary controls are synchronized. Mirror production authority remains independently authoritative for its own production surface."
           EXISTING="$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" "$API_URL?state=open&head=DataNest-Supository:$BRANCH&base=main")"
 
           if [ "$(printf '%s' "$EXISTING" | jq 'length')" -gt 0 ]; then
@@ -187,5 +187,5 @@ jobs:
             if [ -n "${{ steps.pr.outputs.url }}" ]; then
               echo "- Current refresh PR: ${{ steps.pr.outputs.url }}"
             fi
-            echo "Mirror production authority remains false; canonical promotion remains a separate governed flow."
+            echo "Mirror production authority remains independently authoritative for its own production surface; canonical promotion remains a separate governed flow."
           } >> "$GITHUB_STEP_SUMMARY"
