@@ -1,8 +1,8 @@
 {
   "schemaVersion": "mirror-canonical-lineage-v2",
-  "canonicalSha": "59ed8f110ff352c863a2296a85ec2b8b9b882e37",
-  "mirrorBaseSha": "cafa8160e94d2620ac33d54e8c9143c5fc3da8d6",
-  "mirrorSyncSha": "bf5bb2ae5fcd70f6ea021ba0d4603e857353d4df",
-  "boundaryDigest": "sha256:6807c9d494f7fedc5682e41dbe7dffddbee9ff82005fb87dde1618d93df869ea",
-  "synchronizedAt": "2026-10-01T15:10:56.389Z"
+  "canonicalSha": "5845d549745458297600e2c9d084d5cdb46500ca",
+  "mirrorBaseSha": "2f926e44dd889f33a75492d139dd3030883da558",
+  "mirrorSyncSha": "d4b41657baf62a06abee168bed1b09b4ecdbc72b",
+  "boundaryDigest": "sha256:cd3d6bd36db5463af91014bde84c416ba9e52006d80d3b812322d70b4b02b4b3",
+  "synchronizedAt": "2026-10-01T15:25:10.166Z"
 }
