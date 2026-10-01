@@ -91,7 +91,11 @@
         "config/botsquad-consumer.json",
         "botsquad/inbox/**",
         "scripts/botsquad-feed-consumer.mjs",
-        "tests/unit/botsquad-feed-consumer.test.mjs"
+        "tests/unit/botsquad-feed-consumer.test.mjs",
+        "config/branch-protection.tree.json",
+        "scripts/branch-protection-tree.mjs",
+        "tests/unit/branch-protection-tree.test.mjs",
+        "docs/governance/BRANCH_X_PROTECTION.md"
       ]
     },
     {

@@ -7,7 +7,10 @@
     "^production$",
     "^release/",
     "^automation/knowledge-inbox$",
-    "^automation/botsquad-inbox$"
+    "^automation/botsquad-inbox$",
+    "^automation/",
+    "^audit/",
+    "^ci/"
   ],
   "supabaseProjects": [
     {

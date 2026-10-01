@@ -1,0 +1,58 @@
+name: BRANCH-X Protection Tree
+on:
+  pull_request:
+    branches:
+      - main
+      - "release/**"
+  push:
+    branches:
+      - main
+      - "release/**"
+      - "automation/**"
+      - "audit/**"
+      - "ci/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+concurrency:
+  group: branch-protection-tree-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: BRANCH-X Protection Tree
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Verify branch policy
+        run: node scripts/branch-protection-tree.mjs
+      - name: Verify canonical push semantics
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          parent="$(git rev-list --parents -n 1 "$GITHUB_SHA")"
+          count="$(printf '%s\n' "$parent" | awk '{print NF-1}')"
+          if [ "$count" -eq 0 ]; then
+            echo "::error::BRANCH-X detected an initial/rewritten main history state."
+            exit 1
+          fi
+          echo "BRANCH-X canonical push semantics verified for $GITHUB_SHA"
+      - name: Run repository unit suite
+        run: npm test
+      - name: Publish BRANCH-X evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p branch-protection/state
+          node scripts/branch-protection-tree.mjs > branch-protection/state/latest.json
+          cat branch-protection/state/latest.json
+      - uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: branch-protection-${{ github.run_id }}
+          path: branch-protection/state/latest.json
+          retention-days: 90
