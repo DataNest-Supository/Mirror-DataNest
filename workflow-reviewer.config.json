@@ -8,8 +8,10 @@
     ".github/workflows",
     "docs",
     "knowledge",
-    "templates",
-    "botsquad"
+    "boundaries",
+    "botsquad",
+    "environment",
+    "enforcer"
   ],
   "exclude": [
     "node_modules",
