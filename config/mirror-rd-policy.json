@@ -10,7 +10,7 @@
     "role": "owner-developer",
     "collaborationModel": "disabled-by-default",
     "sharedWorkspaceFeatures": "hidden-or-disabled",
-    "identityVisibility": "public-runtime-configuration"
+    "identityVisibility": "public-source"
   },
   "authority": {
     "sourceOfTruth": false,
