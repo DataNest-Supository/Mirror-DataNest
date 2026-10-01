@@ -24,7 +24,9 @@ test("boundary blocks Mirror-only control-plane files", () => {
   for (const path of [
     ".github/workflows/sync-canonical.yml",
     ".github/workflows/production-candidate.yml",
-    "config/mirror-rd-policy.json"
+    "config/mirror-rd-policy.json",
+    "scripts/lib/sync-canonical-files.mjs",
+    "tests/unit/repository-boundary.test.mjs"
   ]) {
     assert.equal(classifyPath(path, boundary).policy, "mirror_only");
   }
