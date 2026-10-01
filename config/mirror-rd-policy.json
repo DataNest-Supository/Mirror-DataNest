@@ -86,5 +86,12 @@
     "knowledgeExchange": false,
     "boundariesGovernance": false,
     "productionAuthority": false
+  },
+  "botsquad": {
+    "consumesCanonicalFeed": true,
+    "inboxBranch": "automation/botsquad-inbox",
+    "purpose": "Use canonical AI-generated optimization, UX ease, UI evolution, and function-evolution proposals as R&D input.",
+    "canonicalPromotionAuthority": false,
+    "productionAuthorization": false
   }
 }
