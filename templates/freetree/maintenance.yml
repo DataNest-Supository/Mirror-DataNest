@@ -1,0 +1,54 @@
+name: FREETREE Maintenance
+
+on:
+  schedule:
+    - cron: "11 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: freetree-maintenance
+  cancel-in-progress: false
+
+jobs:
+  branch-cleaner:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Delete only branches with no unique commits and no open PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="main"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/branches?per_page=100" --jq '.[].name' | while IFS= read -r branch; do
+            [ "$branch" = "$base" ] && continue
+            open_prs="$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&head=${GITHUB_REPOSITORY_OWNER}:${branch}" --jq 'length')"
+            [ "$open_prs" != "0" ] && continue
+            ahead="$(gh api "repos/$GITHUB_REPOSITORY/compare/${base}...${branch}" --jq '.ahead_by')"
+            [ "$ahead" != "0" ] && continue
+            encoded="$(python -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "$branch")"
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$encoded"
+            echo "Deleted redundant branch: $branch"
+          done
+
+  streamliner:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply safe text streamlining
+        run: node scripts/workflow-reviewer.mjs --apply
+      - name: Commit safe tracked refinements directly
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -u
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name="github-actions[bot]"               -c user.email="41898282+github-actions[bot]@users.noreply.github.com"               commit -m "chore: FREETREE scheduled streamlining"
+          git push origin HEAD:main

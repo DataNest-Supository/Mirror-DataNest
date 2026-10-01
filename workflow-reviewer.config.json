@@ -6,7 +6,9 @@
     "src",
     "scripts",
     ".github/workflows",
-    "docs"
+    "docs",
+    "knowledge",
+    "templates"
   ],
   "exclude": [
     "node_modules",

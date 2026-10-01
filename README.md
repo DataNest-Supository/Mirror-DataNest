@@ -14,6 +14,15 @@
 
 **Operating rule:** Mirror-DataNest is the owner's build/test/deploy laboratory. Candidate work can be developed and deployed here without collaborative-review gates. When work is ready for governed collaboration or canonical production release, the owner selectively hands it off to `DataNest-Supository/DataNest`, where the existing governance and release controls remain authoritative.
 
+
+## Specialized R&D trees
+
+- **Knowledge consumer** — receives the Mirror-targeted provisional learning feed from canonical Knowledge on an isolated automation branch.
+- **AI Plugin Lab** — Mirror-only registry and read-only validation harness for Ollama, llama.cpp, vLLM, LocalAI, Hugging Face TGI, and generic OpenAI-compatible endpoints.
+- **FREETREE bootstrap** — provisions an isolated open-development snapshot with DataNest synchronization, promotion, Knowledge exchange, and Boundaries controls removed. Baseline credential/platform safety remains.
+
+Maintenance is defined in [`docs/MAINTENANCE_PROTOCOL.md`](docs/MAINTENANCE_PROTOCOL.md), and the R&D provider registry is documented in [`docs/MIRROR_AI_PLUGIN_LAB.md`](docs/MIRROR_AI_PLUGIN_LAB.md).
+
 # DataNest
 
 **DataNest** is the canonical Resonance AppDev web control plane. It governs product execution intent, promotion, evidence and lifecycle state while preserving separate source, backend and delivery authorities.
@@ -63,7 +72,7 @@ Standalone Node/Docker runtimes continue to expose the server health endpoint at
 - Local PC backup hosting: **disabled**
 - AI compute: **replaceable approved HTTPS inference endpoints; no workstation is required**
 - AI architecture: [`docs/DATANEST_AI_ARCHITECTURE.md`](docs/DATANEST_AI_ARCHITECTURE.md)
-- Optional future delivery target: **Vercel**
+- Vercel dependency: **none**
 
 GitHub and Supabase remain the required source/CI and backend authorities. Dropbox is continuity storage for governed release and recovery artifacts; it is not the request-serving production web runtime. Hosting remains replaceable delivery infrastructure, not system authority.
 
@@ -159,9 +168,9 @@ docker build -t resonance-datanest:ci .
 
 Every GitHub Pages deployment also verifies the live homepage, static health marker, and published Supabase runtime configuration from a GitHub-hosted runner.
 
-## Optional Vercel delivery
+## Delivery-provider metadata
 
-Vercel may be used as a future or secondary delivery target. It is not required for core operation and does not become source, backend, product or governance authority by hosting the application.
+Mirror-DataNest does not require Vercel. Its active public candidate delivery target is GitHub Pages; provider metadata must not present the old Vercel preview as required infrastructure.
 
 ## Scheduling safety
 

@@ -1,0 +1,72 @@
+name: Bootstrap Isolated FREETREE
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require repository-administration token
+        env:
+          FREETREE_ADMIN_TOKEN: ${{ secrets.FREETREE_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FREETREE_ADMIN_TOKEN" || {
+            echo "::error::FREETREE_ADMIN_TOKEN is required because repository creation is outside the current repository-scoped GITHUB_TOKEN."
+            exit 1
+          }
+
+      - name: Create FREETREE if needed
+        env:
+          FREETREE_ADMIN_TOKEN: ${{ secrets.FREETREE_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.github.com"
+          auth=(-H "Authorization: Bearer $FREETREE_ADMIN_TOKEN" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28")
+          if curl -fsSL "${auth[@]}" "$api/repos/DataNest-Supository/FREETREE" >/dev/null 2>&1; then
+            echo "FREETREE already exists."
+          else
+            jq -n '{name:"FREETREE",description:"Isolated open-development clone of Mirror-DataNest",private:false,has_issues:true,has_projects:false,has_wiki:false,auto_init:false}' |
+              curl -fsSL -X POST "${auth[@]}" "$api/user/repos" --data-binary @- >/tmp/freetree-create.json
+            jq -e '.full_name == "DataNest-Supository/FREETREE"' /tmp/freetree-create.json >/dev/null
+          fi
+
+      - name: Build isolated snapshot from Mirror main
+        env:
+          FREETREE_ADMIN_TOKEN: ${{ secrets.FREETREE_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/DataNest-Supository/Mirror-DataNest.git /tmp/freetree
+          cd /tmp/freetree
+          rm -rf .git
+          rm -rf .github/workflows
+          rm -f             config/repository-boundary.json             config/mirror-rd-policy.json             config/knowledge-consumer.json             config/mirror-ai-plugins.json             docs/MIRROR_DATANEST_RD_MODE.md             docs/PRODUCTION_CANDIDATE_HANDOFF.md             docs/MIRROR_AI_PLUGIN_LAB.md             scripts/knowledge-feed-consumer.mjs             scripts/mirror-ai-plugin-check.mjs
+          rm -rf knowledge
+          mkdir -p .github/workflows
+          cp "$GITHUB_WORKSPACE/templates/freetree/maintenance.yml" .github/workflows/maintenance.yml
+          cp "$GITHUB_WORKSPACE/templates/freetree/FREETREE.md" FREETREE.md
+          git init -b main
+          git add -A
+          git -c user.name="DataNest FREETREE bootstrap"               -c user.email="41898282+github-actions[bot]@users.noreply.github.com"               commit -m "Bootstrap isolated FREETREE from Mirror-DataNest"
+          git remote add origin "https://x-access-token:$FREETREE_ADMIN_TOKEN@github.com/DataNest-Supository/FREETREE.git"
+          git push --force origin main
+
+      - name: Verify no DataNest synchronization workflows remain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e /tmp/freetree/.github/workflows/sync-canonical.yml
+          test ! -e /tmp/freetree/.github/workflows/production-candidate.yml
+          test ! -e /tmp/freetree/config/repository-boundary.json
+          test -e /tmp/freetree/.github/workflows/maintenance.yml
+          test -e /tmp/freetree/FREETREE.md
