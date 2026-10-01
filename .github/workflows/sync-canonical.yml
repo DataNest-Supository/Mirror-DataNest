@@ -87,21 +87,34 @@ jobs:
             --canonical-ref canonical/main \
             --contract config/repository-boundary.json
 
+          # Commit synchronized content first so candidate lineage can anchor
+          # after the canonical changes rather than before them.
+          git add -A
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" \
+                -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                commit -m "Sync canonical promotable paths: ${CANONICAL_SHA:0:12}"
+            MIRROR_SYNC_SHA="$(git rev-parse HEAD)"
+          else
+            MIRROR_SYNC_SHA="$MIRROR_SHA"
+          fi
+
           mkdir -p .datanest/coordination
           boundary_sha256="$(sha256sum config/repository-boundary.json | cut -d' ' -f1)"
           jq -n \
-            --arg schemaVersion "mirror-canonical-lineage-v1" \
+            --arg schemaVersion "mirror-canonical-lineage-v2" \
             --arg canonicalSha "$CANONICAL_SHA" \
             --arg mirrorBaseSha "$MIRROR_SHA" \
+            --arg mirrorSyncSha "$MIRROR_SYNC_SHA" \
             --arg boundaryDigest "sha256:$boundary_sha256" \
             --arg synchronizedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{schemaVersion:$schemaVersion,canonicalSha:$canonicalSha,mirrorBaseSha:$mirrorBaseSha,boundaryDigest:$boundaryDigest,synchronizedAt:$synchronizedAt}' \
+            '{schemaVersion:$schemaVersion,canonicalSha:$canonicalSha,mirrorBaseSha:$mirrorBaseSha,mirrorSyncSha:$mirrorSyncSha,boundaryDigest:$boundaryDigest,synchronizedAt:$synchronizedAt}' \
             > .datanest/coordination/canonical-lineage.json
 
-          git add -A
+          git add .datanest/coordination/canonical-lineage.json
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-              commit -m "Sync canonical promotable paths: ${CANONICAL_SHA:0:12}"
+              commit -m "Record canonical sync lineage: ${CANONICAL_SHA:0:12}"
           git push origin "$BRANCH"
 
           echo "reused=false" >> "$GITHUB_OUTPUT"
