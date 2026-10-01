@@ -86,7 +86,12 @@
         "scripts/knowledge-feed-consumer.mjs",
         "scripts/mirror-ai-plugin-check.mjs",
         "templates/freetree/**",
-        "tests/unit/knowledge-feed-consumer.test.mjs"
+        "tests/unit/knowledge-feed-consumer.test.mjs",
+        ".github/workflows/botsquad-feed-consumer.yml",
+        "config/botsquad-consumer.json",
+        "botsquad/inbox/**",
+        "scripts/botsquad-feed-consumer.mjs",
+        "tests/unit/botsquad-feed-consumer.test.mjs"
       ]
     },
     {
