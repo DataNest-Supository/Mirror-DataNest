@@ -1,8 +1,10 @@
 name: Refresh from Canonical DataNest
 
 on:
+  repository_dispatch:
+    types: [canonical-main-updated]
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "17 2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,10 +17,10 @@ concurrency:
 
 jobs:
   refresh:
-    name: Converge Mirror onto latest canonical main
+    name: Converge Mirror onto canonical promotable paths
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout mirror main
+      - name: Checkout Mirror main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -26,11 +28,12 @@ jobs:
       - name: Fetch canonical DataNest main
         shell: bash
         run: |
+          set -euo pipefail
           git remote add canonical https://github.com/DataNest-Supository/DataNest.git
           git fetch canonical main --prune
 
-      - name: Compare canonical and mirror
-        id: compare
+      - name: Capture exact lineage
+        id: lineage
         shell: bash
         run: |
           set -euo pipefail
@@ -38,71 +41,79 @@ jobs:
           MIRROR_SHA="$(git rev-parse origin/main)"
           echo "canonical_sha=$CANONICAL_SHA" >> "$GITHUB_OUTPUT"
           echo "mirror_sha=$MIRROR_SHA" >> "$GITHUB_OUTPUT"
-          if git merge-base --is-ancestor "$CANONICAL_SHA" "$MIRROR_SHA"; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Canonical main is already contained in Mirror main."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
 
-      - name: Prepare convergent canonical refresh branch
-        if: steps.compare.outputs.changed == 'true'
+      - name: Prepare immutable canonical refresh branch
         id: branch
         shell: bash
+        env:
+          CANONICAL_SHA: ${{ steps.lineage.outputs.canonical_sha }}
+          MIRROR_SHA: ${{ steps.lineage.outputs.mirror_sha }}
         run: |
           set -euo pipefail
-          BRANCH="sync/canonical-main-latest"
-          git checkout -B "$BRANCH" canonical/main
+          SHORT_CANONICAL="${CANONICAL_SHA:0:12}"
+          SHORT_MIRROR="${MIRROR_SHA:0:7}"
+          BRANCH="sync/canonical-main-${SHORT_CANONICAL}-${SHORT_MIRROR}"
 
-          # Canonical provides the application baseline, while Mirror owns its
-          # workflow surface. Preserve every Mirror-owned workflow exactly.
-          git checkout origin/main -- .github/workflows
-          while IFS= read -r workflow_file; do
-            if ! git ls-tree -r --name-only origin/main -- .github/workflows | grep -Fxq "$workflow_file"; then
-              git rm -f "$workflow_file"
-            fi
-          done < <(git ls-files .github/workflows)
+          git switch -c "$BRANCH" "origin/main"
+          git show "canonical/main:config/repository-boundary.json" > config/repository-boundary.json
 
-          git add .github/workflows
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Preserve Mirror-owned Actions workflows"
+          node scripts/lib/sync-canonical-files.mjs \
+            --canonical-ref canonical/main \
+            --contract config/repository-boundary.json
+
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No promotable canonical changes require a Mirror refresh."
+            exit 0
           fi
 
-          # This branch is bot-owned and intentionally converges on the latest
-          # canonical snapshot. Concurrency above prevents overlapping refreshes.
-          git push --force origin "$BRANCH"
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "Sync canonical promotable paths: ${CANONICAL_SHA:0:12}"
+          git push origin "$BRANCH"
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Create or update current mirror refresh PR
-        if: steps.compare.outputs.changed == 'true'
+      - name: Create refresh PR
+        if: steps.branch.outputs.changed == 'true'
         id: pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ steps.branch.outputs.name }}
-          CANONICAL_SHA: ${{ steps.compare.outputs.canonical_sha }}
-          MIRROR_SHA: ${{ steps.compare.outputs.mirror_sha }}
+          CANONICAL_SHA: ${{ steps.lineage.outputs.canonical_sha }}
+          MIRROR_SHA: ${{ steps.lineage.outputs.mirror_sha }}
         shell: bash
         run: |
           set -euo pipefail
           API_URL="https://api.github.com/repos/DataNest-Supository/Mirror-DataNest/pulls"
-          BODY="Canonical DataNest/main moved. This refreshes the R&D baseline only; Mirror-owned Actions workflows remain authoritative for Mirror execution and Pages publication. Exact lineage: canonical=$CANONICAL_SHA; mirror=$MIRROR_SHA. The bot-owned $BRANCH branch is force-updated to the latest canonical snapshot so there is one current refresh PR instead of a queue of stale SHA-specific PRs."
+          BODY="$(cat <<EOF
+Canonical DataNest/main refresh.
 
-          EXISTING="$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" "$API_URL?state=open&head=DataNest-Supository:$BRANCH&base=main")"
+This branch is an immutable snapshot of:
+- Canonical DataNest/main: $CANONICAL_SHA
+- Mirror main refresh base: $MIRROR_SHA
 
-          if [ "$(printf '%s' "$EXISTING" | jq 'length')" -gt 0 ]; then
-            PR_NUMBER="$(printf '%s' "$EXISTING" | jq -r '.[0].number')"
-            jq -n --arg title "Sync latest canonical DataNest main into R&D mirror" --arg body "$BODY" '{title:$title,body:$body}' | curl -fsSL -X PATCH -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "$API_URL/$PR_NUMBER" --data-binary @- >/tmp/refresh-pr.json
-          else
-            jq -n --arg title "Sync latest canonical DataNest main into R&D mirror" --arg head "$BRANCH" --arg body "$BODY" '{title:$title,head:$head,base:"main",body:$body}' | curl -fsSL -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "$API_URL" --data-binary @- >/tmp/refresh-pr.json
-            PR_NUMBER="$(jq -r '.number' /tmp/refresh-pr.json)"
-          fi
+Only paths classified as promotable by the canonical repository-boundary contract are synchronized. Mirror-only, canonical-only, and protected-shared paths remain under their declared authority.
+EOF
+)"
+
+          jq -n --arg title "Sync canonical DataNest main into R&D mirror" \
+            --arg head "$BRANCH" --arg body "$BODY" \
+            '{title:$title,head:$head,base:"main",body:$body}' |
+            curl -fsSL -X POST \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "$API_URL" --data-binary @- > /tmp/refresh-pr.json
 
           jq -e '.number and .html_url' /tmp/refresh-pr.json >/dev/null
-          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "number=$(jq -r '.number' /tmp/refresh-pr.json)" >> "$GITHUB_OUTPUT"
           echo "url=$(jq -r '.html_url' /tmp/refresh-pr.json)" >> "$GITHUB_OUTPUT"
 
       - name: Close superseded bot refresh PRs
-        if: steps.compare.outputs.changed == 'true'
+        if: steps.branch.outputs.changed == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURRENT_PR: ${{ steps.pr.outputs.number }}
@@ -110,32 +121,45 @@ jobs:
         run: |
           set -euo pipefail
           API_URL="https://api.github.com/repos/DataNest-Supository/Mirror-DataNest/pulls"
-          OPEN_PRS="$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" "$API_URL?state=open&base=main&per_page=100")"
+          OPEN_PRS="$(curl -fsSL \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$API_URL?state=open&base=main&per_page=100")"
 
           mapfile -t STALE_PRS < <(
-            printf '%s' "$OPEN_PRS" | jq -r --argjson current "$CURRENT_PR" '.[] |
+            printf '%s' "$OPEN_PRS" | jq -r \
+              --argjson current "$CURRENT_PR" \
+              '.[] |
                select(.number != $current) |
                select(.user.login == "github-actions[bot]") |
-               select(.head.ref | test("^sync/canonical-main-[0-9a-f]{12}$")) |
+               select(.head.ref | test("^sync/canonical-main-[0-9a-f]{12}-[0-9a-f]{7}$")) |
                .number'
           )
 
           for pr_number in "${STALE_PRS[@]}"; do
-            jq -n '{state:"closed"}' | curl -fsSL -X PATCH -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "$API_URL/$pr_number" --data-binary @- >/dev/null
+            jq -n '{state:"closed"}' |
+              curl -fsSL -X PATCH \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "$API_URL/$pr_number" --data-binary @- >/dev/null
             echo "Closed superseded bot refresh PR #$pr_number"
           done
 
       - name: Refresh summary
         if: always()
+        env:
+          CANONICAL_SHA: ${{ steps.lineage.outputs.canonical_sha }}
+          MIRROR_SHA: ${{ steps.lineage.outputs.mirror_sha }}
         shell: bash
         run: |
           {
             echo "## Canonical refresh"
-            echo "- Canonical SHA: ${{ steps.compare.outputs.canonical_sha }}"
-            echo "- Mirror SHA before refresh: ${{ steps.compare.outputs.mirror_sha }}"
-            echo "- Refresh required: ${{ steps.compare.outputs.changed }}"
+            echo "- Canonical SHA: \`$CANONICAL_SHA\`"
+            echo "- Mirror main refresh base: \`$MIRROR_SHA\`"
+            echo "- Refresh branch: \`${{ steps.branch.outputs.name || 'none' }}\`"
             if [ -n "${{ steps.pr.outputs.url }}" ]; then
               echo "- Current refresh PR: ${{ steps.pr.outputs.url }}"
             fi
-            echo "Mirror production authority remains false; canonical promotion is separate and human-governed."
+            echo "Mirror production authority remains false; canonical promotion remains a separate governed flow."
           } >> "$GITHUB_STEP_SUMMARY"
