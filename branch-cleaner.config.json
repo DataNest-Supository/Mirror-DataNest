@@ -6,8 +6,20 @@
     "^main$",
     "^production$",
     "^release/",
-    "^automation/knowledge-inbox$",
-    "^automation/botsquad-inbox$"
+    "^automation/knowledge-feed$",
+    "^automation/botsquad/",
+    "^automation/environment-feed$",
+    "^automation/enforcer$",
+    "^automation/guardian$",
+    "^automation/conductor$",
+    "^automation/suggester$",
+    "^automation/calmer$",
+    "^automation/regulator$",
+    "^automation/visibility-utility$",
+    "^automation/liberty-in-all$",
+    "^automation/",
+    "^audit/",
+    "^ci/"
   ],
   "supabaseProjects": [
     {
