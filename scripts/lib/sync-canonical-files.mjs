@@ -11,51 +11,58 @@ const contractPath = arg("--contract") ?? "config/repository-boundary.json";
 const boundary = loadBoundary(contractPath);
 
 function git(args, options = {}) {
-  return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options }).trimEnd();
+  return execFileSync("git", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    ...options
+  }).trimEnd();
 }
 
-function filesAt(ref) {
-  return git(["ls-tree", "-r", "--name-only", ref]).split(/\r?\n/).filter(Boolean);
-}
-function localFiles() {
-  return git(["ls-files"]).split(/\r?\n/).filter(Boolean);
-}
-function blobAt(ref, path) {
-  try {
-    const line = git(["ls-tree", "-r", ref, "--", path]);
-    if (!line) return null;
-    return line.split(/\t/, 2)[0].split(/\s+/)[2] ?? null;
-  } catch {
-    return null;
-  }
+const changedEntries = git(["diff", "--name-status", "--find-renames", "HEAD", canonicalRef])
+  .split(/\r?\n/)
+  .filter(Boolean)
+  .map((line) => {
+    const [status, ...parts] = line.split("\t");
+    const paths = parts.length >= 2 ? parts.slice(-2) : parts;
+    return {
+      status,
+      path: parts.length >= 2 ? paths[1] : paths[0]
+    };
+  })
+  .filter((entry) => entry.path);
+
+const classifications = changedEntries.map((entry) => ({
+  ...entry,
+  classification: classifyPath(entry.path, boundary)
+}));
+
+const unclassified = classifications.filter((entry) => entry.classification.policy === "unclassified");
+if (unclassified.length) {
+  throw new Error(
+    "Boundary is missing classifications for changed paths: " +
+    unclassified.map((entry) => entry.path).join(", ")
+  );
 }
 
-const canonicalFiles = filesAt(canonicalRef);
-const mirrorFiles = localFiles();
-const canonicalClassifications = canonicalFiles.map((path) => classifyPath(path, boundary));
-const mirrorClassifications = mirrorFiles.map((path) => classifyPath(path, boundary));
-const unknownCanonical = canonicalClassifications.filter((item) => item.policy === "unclassified");
-const unknownMirror = mirrorClassifications.filter((item) => item.policy === "unclassified");
-
-if (unknownCanonical.length || unknownMirror.length) {
-  const lines = [...unknownCanonical, ...unknownMirror].map((item) => item.path);
-  throw new Error("Boundary is missing classifications for: " + lines.join(", "));
-}
-
-const canonicalSet = new Set(canonicalFiles);
 let changed = 0;
-for (const item of canonicalClassifications.filter((value) => value.policy === "promotable")) {
-  const canonicalSha = blobAt(canonicalRef, item.path);
-  const mirrorSha = blobAt("HEAD", item.path);
-  if (canonicalSha !== mirrorSha) {
-    execFileSync("git", ["checkout", canonicalRef, "--", item.path], { stdio: "inherit" });
-    changed += 1;
+for (const entry of classifications.filter((item) => item.classification.policy === "promotable")) {
+  const canonicalPath = entry.path;
+  if (entry.status.startsWith("D")) {
+    execFileSync("git", ["rm", "-f", "--", canonicalPath], { stdio: "inherit" });
+  } else {
+    execFileSync("git", ["checkout", canonicalRef, "--", canonicalPath], { stdio: "inherit" });
   }
+  changed += 1;
 }
-for (const item of mirrorClassifications.filter((value) => value.policy === "promotable")) {
-  if (!canonicalSet.has(item.path)) {
-    execFileSync("git", ["rm", "-f", "--", item.path], { stdio: "inherit" });
-    changed += 1;
-  }
-}
-console.log(JSON.stringify({ canonicalRef, changed }, null, 2));
+
+console.log(JSON.stringify({
+  canonicalRef,
+  comparedPaths: classifications.length,
+  changed,
+  blockedPreservedPaths: classifications
+    .filter((item) => item.classification.policy !== "promotable")
+    .map((item) => ({
+      path: item.path,
+      policy: item.classification.policy
+    }))
+}, null, 2));
