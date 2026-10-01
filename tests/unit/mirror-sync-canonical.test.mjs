@@ -26,9 +26,11 @@ test("canonical refresh synchronizes canonical-owned boundary controls explicitl
 
 test("canonical refresh records machine-readable selective-sync lineage", () => {
   assert.match(workflow, /canonical-lineage\.json/);
-  assert.match(workflow, /mirror-canonical-lineage-v1/);
+  assert.match(workflow, /mirror-canonical-lineage-v2/);
   assert.match(workflow, /canonicalSha:\$canonicalSha/);
   assert.match(workflow, /mirrorBaseSha:\$mirrorBaseSha/);
+  assert.match(workflow, /mirrorSyncSha:\$mirrorSyncSha/);
+  assert.match(workflow, /MIRROR_SYNC_SHA="\$\(git rev-parse HEAD\)"/);
   assert.match(workflow, /boundaryDigest:\$boundaryDigest/);
 });
 
