@@ -48,7 +48,7 @@
     "automaticCanonicalSync": true,
     "automaticReverseSync": false,
     "promotion": "Owner-controlled selective handoff only.",
-    "canonicalSyncMode": "repository_dispatch-with-daily-reconciliation",
+    "canonicalSyncMode": "repository_dispatch-with-hourly-reconciliation",
     "reverseSync": "immutable-candidate-and-release-evidence-handoff-only"
   },
   "fastLane": {
@@ -59,5 +59,32 @@
     "canonicalProductionAuthority": false,
     "canonicalGovernanceAuthority": false,
     "productionCandidateChecks": "hard-gate"
+  },
+  "knowledge": {
+    "contributesRepositoryEvidence": true,
+    "consumesTargetedFeed": true,
+    "inboxBranch": "automation/knowledge-inbox",
+    "certifiedMemoryAuthority": false,
+    "productionAuthorization": false
+  },
+  "aiPluginLab": {
+    "mode": "mirror-only",
+    "registry": "config/mirror-ai-plugins.json",
+    "openRuntimes": [
+      "ollama",
+      "llama_cpp",
+      "vllm",
+      "localai",
+      "huggingface_tgi",
+      "generic_openai_compatible"
+    ],
+    "canonicalPromotionAuthority": false
+  },
+  "freetree": {
+    "targetRepository": "DataNest-Supository/FREETREE",
+    "synchronization": "none",
+    "knowledgeExchange": false,
+    "boundariesGovernance": false,
+    "productionAuthority": false
   }
 }
