@@ -21,3 +21,9 @@ test("canonical refresh retires only superseded bot SHA branches", () => {
   assert.match(workflow, /\^sync\/canonical-main-\[0-9a-f\]\{12\}\$/);
   assert.match(workflow, /select\(\.number != \$current\)/);
 });
+
+test("canonical refresh keeps generated PR text inside the workflow run block", () => {
+  assert.doesNotMatch(workflow, /BODY="\$\(cat <<EOF/);
+  assert.ok(workflow.includes('BODY="Canonical DataNest/main moved.'));
+  assert.ok(workflow.includes("$'\\n\\n'"));
+});
