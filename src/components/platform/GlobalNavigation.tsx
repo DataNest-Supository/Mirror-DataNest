@@ -1,27 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import WorkspaceGlyph from "./WorkspaceGlyph";
 import type { NavigationItem } from "@/components/platform/navigationTypes";
-
-const navigationGlyphs:Record<string,string> = {
-  overview:"◎",
-  ai:"✦",
-  stakeholder:"◌",
-  sparks:"✧",
-  impact:"◉",
-  thinktank:"◈",
-  governance:"◆",
-  products:"◉",
-  external_auditor:"◫",
-  productlab:"▣",
-  unifi:"◇",
-  scheduler:"⌁",
-  runs:"▶",
-  checkpoints:"↺",
-  audit:"≡",
-  transparency:"◎",
-  settings:"⚙"
-};
 
 const legalLinks=[
   {href:"/legal",label:"Legal Centre"},
@@ -57,7 +38,7 @@ export default function GlobalNavigation({
           aria-current={currentView===item.id?"page":undefined}
           onClick={()=>onNavigate(item.id)}
         >
-          <span aria-hidden="true">{navigationGlyphs[item.id]||"•"}</span>{item.label}
+          <span aria-hidden="true"><WorkspaceGlyph view={item.id}/></span>{item.label}
         </button>)}
       </details>)}
     </nav>

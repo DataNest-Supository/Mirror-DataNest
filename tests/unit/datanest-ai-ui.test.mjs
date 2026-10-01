@@ -29,8 +29,8 @@ test("DataNest AI keeps the animated hero while compressing duplicated workspace
   assert.ok(heroIndex<chatIndex&&chatIndex<commandIndex&&commandIndex<contextDetailsIndex&&contextDetailsIndex<advancedIndex,
     "DOM order must keep the animated hero visible, then the command channel, compact work context and optional detail disclosures");
   assert.doesNotMatch(workspace,/className="datanestAiOverviewDisclosure"/);
-  assert.match(workspace,/datanestAiOrbitOne/);
-  assert.match(workspace,/datanestAiPacket packetOne/);
+  assert.match(workspace,/<AiCoreVisual state=/);
+  assert.match(workspace,/contextReady\?"ready":"standby"/);
 
   assert.match(app,/view!==\"ai\"&&workspaceTaskGuides\[view\]/);
   assert.match(workspace,/htmlFor="datanest-ai-active-job">Active Job context/);

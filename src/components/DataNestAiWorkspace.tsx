@@ -9,6 +9,7 @@ import DataNestAiCertificationPanel from "@/components/DataNestAiCertificationPa
 import IntelligenceFabricPanel from "@/components/IntelligenceFabricPanel";
 import JobInviteForm from "@/components/JobInviteForm";
 import PageHeader from "@/components/platform/PageHeader";
+import AiCoreVisual from "@/components/AiCoreVisual";
 import StatusIndicator from "@/components/platform/StatusIndicator";
 
 type Role="owner"|"admin"|"operator"|"viewer";
@@ -324,7 +325,7 @@ export default function DataNestAiWorkspace({
     {jobsError&&<section className="panel" role="alert"><p>{jobsError}</p><button className="secondaryButton" disabled={jobsLoading} onClick={()=>void loadJobs()}>Retry loading jobs</button></section>}
     {contextError&&<section className="panel" role="alert"><h3>Job context needs attention</h3><p>{contextError}</p><p className="muted">Your draft is preserved. Retry context loading before sending another command.</p><button className="secondaryButton" disabled={loading} onClick={()=>void refreshContext()}>Retry AI context</button></section>}
 
-      {!focusMode&&<section className={"datanestAiHero datanestAiHeroV2 "+(loading?"isWorking":"isReady")} aria-label="DataNest AI development command center">
+      {!focusMode&&<section className={"datanestAiHero datanestAiHeroV2 "+(loading?"isWorking":contextReady?"isReady":"needsAttention")} aria-label="DataNest AI development command center">
       <div className="datanestAiHeroGrid" aria-hidden="true"/>
       <div className="datanestAiHeroGlow datanestAiHeroGlowOne" aria-hidden="true"/>
       <div className="datanestAiHeroGlow datanestAiHeroGlowTwo" aria-hidden="true"/>
@@ -335,7 +336,7 @@ export default function DataNestAiWorkspace({
           DATANEST AI // INTELLIGENCE CORE
         </div>
         <h2><span>DataNest</span> AI</h2>
-        <h3>Governed intelligence for <strong>everything DataNest knows.</strong></h3>
+        <h3>Your intent. <strong>Intelligence in motion.</strong></h3>
         <p>
           Bring human intent, governed project context and certified memory into one traceable development workspace.
         </p>
@@ -350,74 +351,15 @@ export default function DataNestAiWorkspace({
         </div>
       </div>
 
-      <div className="datanestAiHeroVisual" aria-label="DataNest AI intelligence core with governed project context">
-        <div className="datanestAiHudHeader" aria-hidden="true">
-          <span>RESONANCE / DATANEST</span>
-          <b>AI CORE</b>
-          <small>{contextStatus}</small>
-        </div>
-        <article className="datanestAiFloatCard datanestAiContextCard">
-          <span className="datanestAiFloatIcon" aria-hidden="true">▰</span>
-          <div>
-            <b>Project Context</b>
-            <small>{selectedJob?jobCode(selectedJob):"Job manifest"}</small>
-            <small>Source · Documentation · Architecture</small>
-          </div>
-        </article>
-
-        <article className="datanestAiFloatCard datanestAiExternalCard">
-          <span className="datanestAiFloatIcon" aria-hidden="true">⌁</span>
-          <div>
-            <b>External AI</b>
-            <small>Companion mode</small>
-            <small>Traceable returned output</small>
-          </div>
-        </article>
-
-        <div className="datanestAiCoreStage" aria-hidden="true">
-          <div className="datanestAiOrbit datanestAiOrbitOne"/>
-          <div className="datanestAiOrbit datanestAiOrbitTwo"/>
-          <div className="datanestAiOrbit datanestAiOrbitThree"/>
-          <span className="datanestAiPacket packetOne"/>
-          <span className="datanestAiPacket packetTwo"/>
-          <span className="datanestAiPacket packetThree"/>
-          <span className="datanestAiPacket packetFour"/>
-          <div className="datanestAiCoreSphere">
-            <span className="datanestAiCoreGlyph">AI</span>
-            <b>DATANEST</b>
-            <small>{contextStatus}</small>
-          </div>
-          <div className="datanestAiCoreBeam"/>
-          <div className="datanestAiCoreBase">
-            <i/><i/><i/>
-          </div>
-        </div>
-
-        <article className="datanestAiFloatCard datanestAiToolsCard">
-          <span className="datanestAiFloatIcon" aria-hidden="true">&gt;_</span>
-          <div>
-            <b>Development Tools</b>
-            <small>Hosted CI · Cloud browser</small>
-            <small>GitHub Actions · Playwright traces</small>
-          </div>
-        </article>
-
-        <article className="datanestAiFloatCard datanestAiMemoryCard">
-          <span className="datanestAiFloatIcon" aria-hidden="true">◫</span>
-          <div>
-            <b>Certified Memory</b>
-            <small>{context?.certifiedMemory?.length||0} project-wide item{(context?.certifiedMemory?.length||0)===1?"":"s"}</small>
-            <small>Governed validation · Provenance</small>
-          </div>
-        </article>
-
-        <div className="datanestAiActivity" aria-hidden="true">
-          <span/><span/><span/><span/><span/><span/><span/><span/><span/>
-        </div>
-        <div className="datanestAiPipelineLabel">
-          <span className="datanestAiPipelineDot"/>
-          {loading?"AI context pipeline synchronising":contextReady?"Governed Job context ready":"Job context needs attention"}
-        </div>
+      <div className="datanestAiHeroVisual aiHud" aria-label="DataNest AI intelligence core with governed project context">
+        <div className="aiHudHeading"><span>RESONANCE / INTELLIGENCE CORE</span><span>{contextStatus}</span></div>
+        <div className="aiHudInstrument"><AiCoreVisual state={loading?"syncing":contextError||jobsError?"attention":contextReady?"ready":"standby"} status={contextStatus}/></div>
+        <dl className="aiHudReadouts">
+          <div><dt>Job context</dt><dd>{selectedJob?jobCode(selectedJob):"Select a Job"}</dd></div>
+          <div><dt>Session activity</dt><dd>{contextReady?`${context?.events?.length||0} recorded events`:"Waiting for context"}</dd></div>
+          <div><dt>Certified Memory</dt><dd>{contextReady?`${context?.certifiedMemory?.length||0} project-wide items`:"Waiting for context"}</dd></div>
+          <div><dt>Development Tools</dt><dd>Hosted CI · Cloud browser</dd></div>
+        </dl>
       </div>
     </section>}
 
