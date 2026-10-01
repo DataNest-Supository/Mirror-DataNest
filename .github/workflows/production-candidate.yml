@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       canonical_base_sha:
-        description: Exact DataNest/main SHA this R&D work was based on
+        description: Exact current DataNest/main SHA this R&D work was synchronized from
         required: true
         type: string
       candidate_name:
@@ -16,28 +16,110 @@ on:
         required: true
         type: string
       live_evidence_run:
-        description: Optional Mirror live-verification workflow URL; canonical release still requires reviewed evidence
-        required: false
+        description: Successful live Mirror Pages verification workflow URL for this exact SHA
+        required: true
         type: string
+
 permissions:
   contents: read
+  actions: read
 
 jobs:
   package:
-    name: Build Mirror production-candidate evidence
+    name: Build eligible Mirror production-candidate evidence
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       BASE_SHA: ${{ inputs.canonical_base_sha }}
       CANDIDATE_NAME: ${{ inputs.candidate_name }}
       CANDIDATE_SUMMARY: ${{ inputs.summary }}
       LIVE_EVIDENCE_RUN: ${{ inputs.live_evidence_run }}
+
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - uses: ./.github/actions/node-project-setup
+
+      - name: Fetch canonical main and validate recorded sync lineage
+        id: lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! [[ "$BASE_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "::error::canonical_base_sha must be an exact 40-character Git SHA"
+            exit 1
+          fi
+          if ! [[ "$LIVE_EVIDENCE_RUN" =~ ^https://github.com/DataNest-Supository/Mirror-DataNest/actions/runs/[0-9]+$ ]]; then
+            echo "::error::live_evidence_run must be an exact Mirror workflow-run URL"
+            exit 1
+          fi
+          if [ ! -f .datanest/coordination/canonical-lineage.json ]; then
+            echo "::error::Mirror has no canonical sync lineage. Run/merge the canonical refresh first."
+            exit 1
+          fi
+
+          MIRROR_BASE_SHA="$(jq -r '.mirrorBaseSha // empty' .datanest/coordination/canonical-lineage.json)"
+          RECORDED_CANONICAL_SHA="$(jq -r '.canonicalSha // empty' .datanest/coordination/canonical-lineage.json)"
+          if ! [[ "$MIRROR_BASE_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || ! [[ "$RECORDED_CANONICAL_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "::error::Recorded Mirror canonical lineage is malformed."
+            exit 1
+          fi
+
+          git remote add canonical https://github.com/DataNest-Supository/DataNest.git
+          git fetch canonical main --no-tags
+          CANONICAL_SHA="$(git rev-parse canonical/main)"
+          if [ "$BASE_SHA" != "$CANONICAL_SHA" ] || [ "$BASE_SHA" != "$RECORDED_CANONICAL_SHA" ]; then
+            echo "::error::Candidate base must match both current canonical main and the Mirror sync lineage."
+            echo "Current canonical: $CANONICAL_SHA"
+            echo "Recorded canonical: $RECORDED_CANONICAL_SHA"
+            echo "Supplied base: $BASE_SHA"
+            exit 1
+          fi
+          git cat-file -e "$BASE_SHA^{commit}"
+          git cat-file -e "$MIRROR_BASE_SHA^{commit}"
+          if ! git merge-base --is-ancestor "$MIRROR_BASE_SHA" "$GITHUB_SHA"; then
+            echo "::error::Mirror candidate does not descend from its recorded Mirror sync base."
+            exit 1
+          fi
+
+          git show "canonical/main:config/repository-boundary.json" > /tmp/canonical-repository-boundary.json
+          if ! cmp -s /tmp/canonical-repository-boundary.json config/repository-boundary.json; then
+            echo "::error::Mirror boundary snapshot does not match the current canonical contract."
+            exit 1
+          fi
+
+          echo "mirror_base_sha=$MIRROR_BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "canonical_sha=$CANONICAL_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Validate successful live evidence for exact candidate SHA
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id="${LIVE_EVIDENCE_RUN##*/}"
+          evidence_json="$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/DataNest-Supository/Mirror-DataNest/actions/runs/$run_id")"
+          status="$(printf '%s' "$evidence_json" | jq -r '.status')"
+          conclusion="$(printf '%s' "$evidence_json" | jq -r '.conclusion')"
+          workflow_path="$(printf '%s' "$evidence_json" | jq -r '.path')"
+          evidence_sha="$(printf '%s' "$evidence_json" | jq -r '.head_sha')"
+          event="$(printf '%s' "$evidence_json" | jq -r '.event')"
+          if [ "$status" != "completed" ] || [ "$conclusion" != "success" ]; then
+            echo "::error::The referenced Mirror live-evidence workflow has not completed successfully."
+            exit 1
+          fi
+          if [ "$workflow_path" != ".github/workflows/pages.yml" ] || [ "$event" != "push" ]; then
+            echo "::error::Live evidence must be a successful pushed Mirror Pages workflow."
+            exit 1
+          fi
+          if [ "$evidence_sha" != "$GITHUB_SHA" ]; then
+            echo "::error::Live evidence SHA does not match this production candidate."
+            echo "Evidence SHA: $evidence_sha"
+            echo "Candidate SHA: $GITHUB_SHA"
+            exit 1
+          fi
 
       - name: Unit-test observation
         id: tests
@@ -54,86 +136,99 @@ jobs:
         continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
 
-      - name: Validate canonical base
+      - name: Validate candidate boundary since last canonical sync
+        id: boundary
+        env:
+          MIRROR_BASE_SHA: ${{ steps.lineage.outputs.mirror_base_sha }}
         shell: bash
         run: |
           set -euo pipefail
-          if ! [[ "$BASE_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
-            echo "::error::canonical_base_sha must be an exact 40-character Git SHA"
-            exit 1
-          fi
-          git remote add canonical https://github.com/DataNest-Supository/DataNest.git
-          git fetch canonical main --no-tags
-          git cat-file -e "$BASE_SHA^{commit}"
-          if ! git merge-base --is-ancestor "$BASE_SHA" canonical/main; then
-            echo "::error::The supplied base is not part of canonical DataNest/main history."
-            exit 1
-          fi
-          if [ -n "$LIVE_EVIDENCE_RUN" ] && ! [[ "$LIVE_EVIDENCE_RUN" =~ ^https://github.com/DataNest-Supository/Mirror-DataNest/actions/runs/[0-9]+$ ]]; then
-            echo "::error::live_evidence_run must be a Mirror workflow-run URL."
-            exit 1
-          fi
-          if ! git merge-base --is-ancestor "$BASE_SHA" "$GITHUB_SHA"; then
-            echo "::error::The supplied canonical base is not an ancestor of this Mirror candidate."
-            echo "Refresh Mirror from DataNest/main or select the correct shared base before packaging production."
-            exit 1
-          fi
+          mkdir -p /tmp/mirror-candidate
+          git diff --name-only "$MIRROR_BASE_SHA" "$GITHUB_SHA" | sort -u > /tmp/mirror-candidate/changed-paths.txt
+          node scripts/validate-mirror-candidate-boundary.mjs \
+            --paths-file /tmp/mirror-candidate/changed-paths.txt \
+            --contract config/repository-boundary.json \
+            --output /tmp/mirror-candidate/boundary-classification.json
 
-      - name: Record R&D observations
+      - name: Hard production-candidate gate
+        if: always()
         shell: bash
-        run: echo "Mirror tests, type checks, and dependency audit are advisory R&D observations; none gates Mirror deployment."
+        run: |
+          set -euo pipefail
+          failures=()
+          [ "${{ steps.tests.outcome }}" = "success" ] || failures+=("unit tests")
+          [ "${{ steps.typecheck.outcome }}" = "success" ] || failures+=("type check")
+          [ "${{ steps.audit.outcome }}" = "success" ] || failures+=("dependency audit")
+          [ "${{ steps.boundary.outcome }}" = "success" ] || failures+=("candidate boundary")
+          if [ "${#failures[@]}" -gt 0 ]; then
+            printf '::error::Production candidate blocked: %s\n' "${failures[*]}"
+            exit 1
+          fi
+          echo "Production candidate hard gate passed."
 
-      - name: Build production-candidate package
+      - name: Build self-contained candidate package
+        if: success()
+        id: package
         shell: bash
         env:
           TEST_OUTCOME: ${{ steps.tests.outcome }}
           TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
           AUDIT_OUTCOME: ${{ steps.audit.outcome }}
+          MIRROR_BASE_SHA: ${{ steps.lineage.outputs.mirror_base_sha }}
         run: |
           set -euo pipefail
           short_sha="${GITHUB_SHA:0:12}"
           out="mirror-production-candidate-$short_sha"
           mkdir -p "$out"
-
-          # Use exactly the same Mirror boundary for every package representation.
-          node --input-type=module -e 'import {candidatePathspec} from "./scripts/lib/mirror-candidate-pathspec.mjs"; console.log(candidatePathspec.join("\n"))' > "$out/candidate-pathspec.txt"
-          mapfile -t candidate_paths < "$out/candidate-pathspec.txt"
-          test "${#candidate_paths[@]}" -gt 1
-          git diff --binary "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/candidate.patch"
-
-          git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/changed-files.txt"
-
-          git diff --stat "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}"             > "$out/diff-stat.txt"
-
-          if [ ! -s "$out/candidate.patch" ]; then
-            echo "::error::No promotable production changes remain after Mirror-only files are excluded."
+          cp config/repository-boundary.json "$out/repository-boundary.json"
+          cp .datanest/coordination/canonical-lineage.json "$out/canonical-lineage.json"
+          cp /tmp/mirror-candidate/boundary-classification.json "$out/boundary-classification.json"
+          cp /tmp/mirror-candidate/changed-paths.txt "$out/changed-paths-since-sync.txt"
+          mapfile -t candidate_paths < <(jq -r '.promotablePaths[]' "$out/boundary-classification.json")
+          if [ "${#candidate_paths[@]}" -eq 0 ]; then
+            echo "::error::No promotable candidate changes exist since the last canonical sync."
             exit 1
           fi
-
-          jq -n             --arg schemaVersion "mirror-production-candidate-v1"             --arg repository "$GITHUB_REPOSITORY"             --arg mirrorSha "$GITHUB_SHA"             --arg canonicalBaseSha "$BASE_SHA"             --arg candidateName "$CANDIDATE_NAME"             --arg summary "$CANDIDATE_SUMMARY"             --arg liveEvidenceRun "$LIVE_EVIDENCE_RUN"             --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"             --arg unitTests "$TEST_OUTCOME"             --arg typeCheck "$TYPECHECK_OUTCOME"             --arg dependencyAudit "$AUDIT_OUTCOME"             --arg createdAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)"             '{
-              schemaVersion:$schemaVersion,
-              repository:$repository,
-              mirrorSha:$mirrorSha,
-              canonicalBaseSha:$canonicalBaseSha,
-              candidateName:$candidateName,
-              summary:$summary,
-              workflowRun:$workflowRun,
-              liveEvidenceRun:(if $liveEvidenceRun == "" then null else $liveEvidenceRun end),
-              observations:{
-                unitTests:$unitTests,
-                typeCheck:$typeCheck,
-                dependencyAudit:$dependencyAudit
-              },
-              authority:{
-                production:false,
-                deployment:false,
-                governance:false
-              },
-              nextRequiredStage:"Optional owner-selected handoff to DataNest; no Mirror production gate",
-              createdAt:$createdAt
-            }' > "$out/candidate.json"
-
+          git diff --binary "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}" > "$out/candidate.patch"
+          if [ ! -s "$out/candidate.patch" ]; then
+            echo "::error::No promotable candidate delta remains against the canonical base."
+            exit 1
+          fi
+          git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}" > "$out/changed-files.txt"
+          git diff --stat "$BASE_SHA" "$GITHUB_SHA" -- "${candidate_paths[@]}" > "$out/diff-stat.txt"
+          patch_sha256="$(sha256sum "$out/candidate.patch" | cut -d' ' -f1)"
+          boundary_sha256="$(sha256sum "$out/repository-boundary.json" | cut -d' ' -f1)"
+          backend_project="$(jq -r '.liveCandidate.backendProject' config/mirror-rd-policy.json)"
+          jq -n \
+            --arg schemaVersion "mirror-production-candidate-v3" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg mirrorSha "$GITHUB_SHA" \
+            --arg mirrorSyncBaseSha "$MIRROR_BASE_SHA" \
+            --arg canonicalBaseSha "$BASE_SHA" \
+            --arg candidateName "$CANDIDATE_NAME" \
+            --arg summary "$CANDIDATE_SUMMARY" \
+            --arg liveEvidenceRun "$LIVE_EVIDENCE_RUN" \
+            --arg workflowRun "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg patchDigest "sha256:$patch_sha256" \
+            --arg boundaryDigest "sha256:$boundary_sha256" \
+            --arg unitTests "$TEST_OUTCOME" \
+            --arg typeCheck "$TYPECHECK_OUTCOME" \
+            --arg dependencyAudit "$AUDIT_OUTCOME" \
+            --arg createdAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{schemaVersion:$schemaVersion,candidateStatus:"eligible-for-canonical-review",repository:$repository,mirrorSha:$mirrorSha,mirrorSyncBaseSha:$mirrorSyncBaseSha,canonicalBaseSha:$canonicalBaseSha,candidateName:$candidateName,summary:$summary,workflowRun:$workflowRun,liveEvidenceRun:$liveEvidenceRun,boundaryContractDigest:$boundaryDigest,patchDigest:$patchDigest,observations:{unitTests:$unitTests,typeCheck:$typeCheck,dependencyAudit:$dependencyAudit,liveEvidence:"pass",candidateBoundary:"pass"},authority:{production:false,deployment:false,governance:false},createdAt:$createdAt}' > "$out/candidate.json"
+          jq -n \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg commitSha "$GITHUB_SHA" \
+            --arg releaseId "mirror-candidate:$GITHUB_SHA" \
+            --arg workflowRun "$GITHUB_RUN_ID" \
+            --arg artifact "MirrorCandidatePatch@$GITHUB_SHA" \
+            --arg digest "sha256:$patch_sha256" \
+            --arg projectId "$backend_project" \
+            '{schemaVersion:"release-evidence-envelope-v1",repository:{fullName:$repository,role:"mirror-rd"},commitSha:$commitSha,releaseId:$releaseId,environment:"staging",backend:{provider:"supabase",projectId:$projectId,environment:"DataNest AI Staging"},workflow:{provider:"github-actions",name:"Package Production Candidate",runId:$workflowRun},artifact:{type:"mirror-production-candidate-patch",identity:$artifact,digest:$digest},verification:{tests:"pass",typecheck:"pass",security:"pass",live:"pass"},governance:{reviewed:false,humanAuthorized:false,reference:$artifact},authority:{productionAuthority:false,productionDeploymentAllowed:false}}' > "$out/release-evidence-envelope.json"
+          node scripts/validate-release-evidence-envelope.mjs "$out/release-evidence-envelope.json"
           echo "CANDIDATE_DIR=$out" >> "$GITHUB_ENV"
+          echo "PATCH_DIGEST=sha256:$patch_sha256" >> "$GITHUB_ENV"
+          echo "MIRROR_SYNC_BASE_SHA=$MIRROR_BASE_SHA" >> "$GITHUB_ENV"
 
       - name: Upload immutable candidate evidence
         uses: actions/upload-artifact@v4.6.2
@@ -150,19 +245,28 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${PROMOTION_TOKEN:-}" ]; then
-            echo "No DATANEST_PROMOTION_TOKEN configured; candidate artifact is ready for canonical import."
+            echo "No DATANEST_PROMOTION_TOKEN configured; the immutable candidate artifact is ready for canonical review."
             exit 0
           fi
-
-          jq -n             --arg event_type "mirror-production-candidate"             --arg mirror_sha "$GITHUB_SHA"             --arg canonical_base_sha "$BASE_SHA"             --arg candidate_name "$CANDIDATE_NAME"             --arg summary "$CANDIDATE_SUMMARY"             --arg candidate_run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"             '{event_type:$event_type,client_payload:{
-              mirror_sha:$mirror_sha,
-              canonical_base_sha:$canonical_base_sha,
-              candidate_name:$candidate_name,
-              summary:$summary,
-              candidate_run:$candidate_run
-            }}' > /tmp/dispatch.json
-
-          curl --fail-with-body --silent --show-error             -X POST             -H "Accept: application/vnd.github+json"             -H "Authorization: Bearer $PROMOTION_TOKEN"             -H "X-GitHub-Api-Version: 2022-11-28"             https://api.github.com/repos/DataNest-Supository/DataNest/dispatches             --data-binary @/tmp/dispatch.json
+          jq -n \
+            --arg event_type "mirror-production-candidate" \
+            --arg mirror_sha "$GITHUB_SHA" \
+            --arg mirror_sync_base_sha "$MIRROR_SYNC_BASE_SHA" \
+            --arg canonical_base_sha "$BASE_SHA" \
+            --arg candidate_name "$CANDIDATE_NAME" \
+            --arg summary "$CANDIDATE_SUMMARY" \
+            --arg candidate_run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg live_evidence_run "$LIVE_EVIDENCE_RUN" \
+            --arg candidate_artifact_name "$CANDIDATE_DIR" \
+            --arg candidate_patch_digest "$PATCH_DIGEST" \
+            '{event_type:$event_type,client_payload:{mirror_sha:$mirror_sha,mirror_sync_base_sha:$mirror_sync_base_sha,canonical_base_sha:$canonical_base_sha,candidate_name:$candidate_name,summary:$summary,candidate_run:$candidate_run,mirror_live_evidence:$live_evidence_run,candidate_artifact_name:$candidate_artifact_name,candidate_patch_digest:$candidate_patch_digest}}' > /tmp/dispatch.json
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $PROMOTION_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/DataNest-Supository/DataNest/dispatches \
+            --data-binary @/tmp/dispatch.json
 
       - name: Candidate summary
         if: always()
@@ -173,10 +277,13 @@ jobs:
             echo
             echo "- Candidate: **$CANDIDATE_NAME**"
             echo "- Mirror SHA: \`$GITHUB_SHA\`"
+            echo "- Mirror sync base: \`${{ steps.lineage.outputs.mirror_base_sha }}\`"
             echo "- Canonical base: \`$BASE_SHA\`"
             echo "- Unit tests: \`${{ steps.tests.outcome }}\`"
             echo "- Type check: \`${{ steps.typecheck.outcome }}\`"
             echo "- Dependency audit: \`${{ steps.audit.outcome }}\`"
+            echo "- Boundary: \`${{ steps.boundary.outcome }}\`"
+            echo "- Live evidence: **required, successful, and exact-SHA-bound**"
             echo
-            echo "This package has **no production authority**. Mirror remains an owner R&D surface; canonical production release is handled separately by DataNest."
+            echo "A successful run is **eligible-for-canonical-review** only. Mirror has no production authority."
           } >> "$GITHUB_STEP_SUMMARY"

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "mode": "single-user-rnd",
   "repository": "DataNest-Supository/Mirror-DataNest",
   "canonicalRepository": "DataNest-Supository/DataNest",
@@ -9,7 +9,8 @@
     "loginEmail": "iace1236912@gmail.com",
     "role": "owner-developer",
     "collaborationModel": "disabled-by-default",
-    "sharedWorkspaceFeatures": "hidden-or-disabled"
+    "sharedWorkspaceFeatures": "hidden-or-disabled",
+    "identityVisibility": "public-source"
   },
   "authority": {
     "sourceOfTruth": false,
@@ -22,8 +23,9 @@
   "gates": {
     "humanApprovalInsideMirrorRequired": false,
     "requiredPullRequestInsideMirror": false,
-    "liveMirrorEvidenceRequiredBeforeProductionCandidate": false,
-    "canonicalGovernanceRequiredBeforeCanonicalLiveProduction": true
+    "liveMirrorEvidenceRequiredBeforeProductionCandidate": true,
+    "canonicalGovernanceRequiredBeforeCanonicalLiveProduction": true,
+    "productionCandidateValidation": "hard-gated"
   },
   "boundaries": {
     "productionBackendWritesAllowed": false,
@@ -43,16 +45,19 @@
   "relationship": {
     "upstream": "DataNest-Supository/DataNest",
     "direction": "Mirror is an R&D laboratory; DataNest-Supository/DataNest is the governed collaborative repository.",
-    "automaticCanonicalSync": false,
+    "automaticCanonicalSync": true,
     "automaticReverseSync": false,
-    "promotion": "Owner-controlled selective handoff only."
+    "promotion": "Owner-controlled selective handoff only.",
+    "canonicalSyncMode": "repository_dispatch-with-daily-reconciliation",
+    "reverseSync": "immutable-candidate-and-release-evidence-handoff-only"
   },
   "fastLane": {
     "directMirrorMainDeploy": true,
     "preDeploymentChecks": "advisory",
     "liveCandidateReview": "owner-controlled",
-    "productionCandidateEvidence": "optional in Mirror",
+    "productionCandidateEvidence": "required",
     "canonicalProductionAuthority": false,
-    "canonicalGovernanceAuthority": false
+    "canonicalGovernanceAuthority": false,
+    "productionCandidateChecks": "hard-gate"
   }
 }
