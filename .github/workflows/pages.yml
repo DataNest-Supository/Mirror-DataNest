@@ -336,3 +336,4 @@ jobs:
           if [ "$ROUTE_OUTCOME" != success ] || [ "$BROWSER_OUTCOME" != success ]; then
             echo "::warning::Mirror production deployment has unsuccessful live observations. Inspect the evidence artifact before canonical handoff."
           fi
+# Production evidence re-run marker: validate live deployment after shell-quoting correction.
