@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "mirror-knowledge-consumer-v1",
+  "sourceRepository": "DataNest-Supository/DataNest",
+  "sourceBranch": "automation/knowledge-feed",
+  "sourcePath": "knowledge/feeds/mirror-datanest.json",
+  "sourceUrl": "https://raw.githubusercontent.com/DataNest-Supository/DataNest/automation/knowledge-feed/knowledge/feeds/mirror-datanest.json",
+  "targetRepository": "DataNest-Supository/Mirror-DataNest",
+  "targetBranch": "automation/knowledge-inbox",
+  "targetPath": "knowledge/inbox/latest.json",
+  "requiredFeed": {
+    "schemaVersion": "datanest-knowledge-feed-v1",
+    "target": "mirror",
+    "authority": "provisional_repository_learning",
+    "productionAuthorization": false,
+    "certifiedMemory": false
+  },
+  "excludedRepositories": [
+    "DataNest-Supository/FREETREE",
+    "DataNest-Supository/Mirror-DataNest-Empty"
+  ]
+}
