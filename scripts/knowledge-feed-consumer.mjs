@@ -22,6 +22,10 @@ async function main(){
   const config=JSON.parse(await readFile(configPath,"utf8"));
   const sourceUrl=process.env.DATANEST_KNOWLEDGE_FEED_URL||config.sourceUrl;
   const response=await fetch(sourceUrl,{headers:{Accept:"application/json","User-Agent":"mirror-datanest-knowledge-consumer"}});
+  if(response.status===404){
+    process.stdout.write(JSON.stringify({status:"feed_not_generated",source:sourceUrl},null,2)+"\n");
+    return;
+  }
   if(!response.ok) throw new Error(`Knowledge feed fetch failed: ${response.status} ${response.statusText}`);
   const raw=await response.text();
   const feed=JSON.parse(raw);
