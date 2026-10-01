@@ -6,7 +6,8 @@
     "^main$",
     "^production$",
     "^release/",
-    "^automation/knowledge-inbox$"
+    "^automation/knowledge-inbox$",
+    "^automation/botsquad-inbox$"
   ],
   "supabaseProjects": [
     {
