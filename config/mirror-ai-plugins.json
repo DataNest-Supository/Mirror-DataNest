@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "mirror-ai-plugin-lab-v1",
+  "mode": "rnd-only",
+  "canonicalPromotionAuthority": false,
+  "credentials": "environment-only",
+  "plugins": [
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "licenseClass": "open-source-runtime",
+      "protocol": "openai_compatible",
+      "defaultEndpoint": "http://127.0.0.1:11434/v1/chat/completions",
+      "defaultModelsEndpoint": "http://127.0.0.1:11434/v1/models",
+      "localOnlyByDefault": true,
+      "requiresApiKey": false
+    },
+    {
+      "id": "llama_cpp",
+      "name": "llama.cpp server",
+      "licenseClass": "open-source-runtime",
+      "protocol": "openai_compatible",
+      "defaultEndpoint": "http://127.0.0.1:8080/v1/chat/completions",
+      "defaultModelsEndpoint": "http://127.0.0.1:8080/v1/models",
+      "localOnlyByDefault": true,
+      "requiresApiKey": false
+    },
+    {
+      "id": "vllm",
+      "name": "vLLM",
+      "licenseClass": "open-source-runtime",
+      "protocol": "openai_compatible",
+      "defaultEndpoint": "http://127.0.0.1:8000/v1/chat/completions",
+      "defaultModelsEndpoint": "http://127.0.0.1:8000/v1/models",
+      "localOnlyByDefault": true,
+      "requiresApiKey": false
+    },
+    {
+      "id": "localai",
+      "name": "LocalAI",
+      "licenseClass": "open-source-runtime",
+      "protocol": "openai_compatible",
+      "defaultEndpoint": "http://127.0.0.1:8080/v1/chat/completions",
+      "defaultModelsEndpoint": "http://127.0.0.1:8080/v1/models",
+      "localOnlyByDefault": true,
+      "requiresApiKey": false
+    },
+    {
+      "id": "huggingface_tgi",
+      "name": "Hugging Face Text Generation Inference",
+      "licenseClass": "open-source-runtime",
+      "protocol": "openai_compatible",
+      "defaultEndpoint": "http://127.0.0.1:8080/v1/chat/completions",
+      "defaultModelsEndpoint": "http://127.0.0.1:8080/v1/models",
+      "localOnlyByDefault": true,
+      "requiresApiKey": false
+    },
+    {
+      "id": "generic_openai_compatible",
+      "name": "Generic OpenAI-compatible endpoint",
+      "licenseClass": "adapter",
+      "protocol": "openai_compatible",
+      "defaultEndpoint": null,
+      "defaultModelsEndpoint": null,
+      "localOnlyByDefault": false,
+      "requiresApiKey": "provider-dependent"
+    }
+  ],
+  "controls": {
+    "mirrorOnly": true,
+    "stagingOnlyForHostedTests": true,
+    "noProductionDatabaseWrites": true,
+    "noCanonicalDeployment": true,
+    "noAutomaticPromotion": true,
+    "noSecretsInRepository": true,
+    "localEndpointsNeverProxiedThroughCanonical": true,
+    "probeRequiresExplicitOptIn": true
+  }
+}
