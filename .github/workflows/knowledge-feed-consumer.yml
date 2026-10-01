@@ -1,0 +1,47 @@
+name: Mirror Knowledge Feed
+
+on:
+  schedule:
+    - cron: "41 */6 * * *"
+      timezone: Africa/Johannesburg
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mirror-knowledge-inbox
+  cancel-in-progress: true
+
+jobs:
+  consume:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Consume canonical Knowledge feed
+        run: node scripts/knowledge-feed-consumer.mjs
+
+      - name: Publish isolated Mirror inbox branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="automation/knowledge-inbox"
+          git fetch origin "$branch" || true
+          git switch -C "$branch"
+          git add knowledge/inbox/latest.json
+          if git diff --cached --quiet; then
+            echo "Mirror Knowledge inbox unchanged."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]"               -c user.email="41898282+github-actions[bot]@users.noreply.github.com"               commit -m "Refresh Mirror Knowledge inbox"
+          git push --force-with-lease origin "HEAD:$branch"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mirror-knowledge-inbox-${{ github.run_id }}
+          path: knowledge/inbox/latest.json
+          retention-days: 14
