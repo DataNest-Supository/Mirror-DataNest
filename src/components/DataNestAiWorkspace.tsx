@@ -329,7 +329,7 @@ export default function DataNestAiWorkspace({
           <div><dt>Development Tools</dt><dd>Hosted CI · Cloud browser</dd></div>
         </dl>
       </div>
-    </section>
+    </section>}
 
     {selectedJob&&<>
       <section id="datanest-ai-chat" className="datanestAiChatStage" aria-label="DataNest AI Chat">
