@@ -132,7 +132,9 @@
         ".github/workflows/branch-protection-tree.yml",
         ".github/CODEOWNERS",
         "tests/unit/branch-protection-tree.test.mjs",
-        "docs/governance/BRANCH_X_PROTECTION.md"
+        "docs/governance/BRANCH_X_PROTECTION.md",
+        "evidence/**",
+        "schemas/**"
       ]
     },
     {
