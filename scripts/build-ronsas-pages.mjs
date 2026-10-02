@@ -20,13 +20,31 @@ const apps=[
 ];
 
 function run(command,args,cwd){
-  const result=spawnSync(command,args,{
-    cwd,
-    stdio:"inherit",
-    env:{...process.env,CI:process.env.CI||"true"}
-  });
-  if(result.error)throw result.error;
-  if(result.status!==0)throw new Error(`${command} ${args.join(" ")} failed with exit code ${result.status}`);
+  const isNpmInstall=command===npmCommand&&args[0]==="ci";
+  const attempts=isNpmInstall?3:1;
+  let lastResult=null;
+
+  for(let attempt=1;attempt<=attempts;attempt++){
+    const result=spawnSync(command,args,{
+      cwd,
+      stdio:"inherit",
+      env:{
+        ...process.env,
+        CI:process.env.CI||"true",
+        ...(isNpmInstall?{
+          npm_config_fetch_timeout:"120000",
+          npm_config_fetch_retry_mintimeout:"20000",
+          npm_config_fetch_retry_maxtimeout:"120000"
+        }: {})
+      }
+    });
+    lastResult=result;
+    if(result.error)throw result.error;
+    if(result.status===0)return;
+    if(attempt<attempts)console.warn(`Retrying ${command} ${args.join(" ")} (attempt ${attempt+1}/${attempts})...`);
+  }
+
+  throw new Error(`${command} ${args.join(" ")} failed with exit code ${lastResult?.status}`);
 }
 
 await access(nextOut);

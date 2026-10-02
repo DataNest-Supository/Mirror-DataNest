@@ -47,13 +47,18 @@ test("public discovery assets expose charter without granting market authority",
   assert.equal(visibilityIndex.authority.bindingSales,false);
 });
 
-test("transparency registry includes charter and market intelligence limitations",()=>{
-  const system=auditRegistry.documents.find(x=>x.id==="datanest-system-charter-v1");
-  const visibility=auditRegistry.documents.find(x=>x.id==="visibility-utility-continuous-market-intelligence");
-  assert.ok(system);
-  assert.ok(visibility);
-  assert.equal(system.assurance.iso_certified,false);
-  assert.equal(system.assurance.guaranteed_business_outcomes,false);
-  assert.equal(visibility.coverage.guaranteed_outcomes,false);
-  assert.equal(visibility.coverage.marketing_spend_authority,false);
+test("transparency registry keeps published audit records non-authoritative",()=>{
+  const auditReturn=auditRegistry.documents.find(x=>x.id==="external-full-system-audit-return-2026-09-25");
+  const auditBrief=auditRegistry.documents.find(x=>x.id==="external-full-system-audit-brief-v1");
+  assert.ok(auditReturn);
+  assert.ok(auditBrief);
+  assert.equal(auditReturn.authority.governance_effect,false);
+  assert.equal(auditReturn.authority.financial_effect,false);
+  assert.equal(auditReturn.authority.ownership_effect,false);
+  assert.equal(auditReturn.authority.role_effect,false);
+  assert.equal(auditReturn.authority.certification_effect,false);
+  assert.equal(auditBrief.authority.governance_effect,false);
+  assert.equal(auditBrief.authority.financial_effect,false);
+  assert.equal(auditBrief.authority.ownership_effect,false);
+  assert.equal(auditBrief.authority.role_effect,false);
 });
