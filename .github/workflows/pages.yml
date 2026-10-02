@@ -54,7 +54,7 @@ jobs:
           curl -fsSL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" \
             "$api/rulesets" > branch-protection/state/rulesets-native.json
 
-          jq -e '(.protected == true) and (.protection.enabled == true) and (.protection.required_status_checks.enforcement_level == "active")' \
+          jq -e '(.protected == true) and (.protection.enabled == true) and ((.protection.required_status_checks.enforcement_level == "everyone") or (.protection.required_status_checks.enforcement_level == "non_admins"))' \
             branch-protection/state/main-native.json >/dev/null || {
               echo "::error::BRANCH-X requires GitHub-native main branch protection before Mirror production can publish."
               cat branch-protection/state/main-native.json
