@@ -47,13 +47,13 @@ test("public discovery assets expose charter without granting market authority",
   assert.equal(visibilityIndex.authority.bindingSales,false);
 });
 
-test("transparency registry includes charter and market intelligence limitations",()=>{
-  const system=auditRegistry.documents.find(x=>x.id==="datanest-system-charter-v1");
-  const visibility=auditRegistry.documents.find(x=>x.id==="visibility-utility-continuous-market-intelligence");
-  assert.ok(system);
-  assert.ok(visibility);
-  assert.equal(system.assurance.iso_certified,false);
-  assert.equal(system.assurance.guaranteed_business_outcomes,false);
-  assert.equal(visibility.coverage.guaranteed_outcomes,false);
-  assert.equal(visibility.coverage.marketing_spend_authority,false);
+test("transparency registry exposes Mirror audit records without authority effects",()=>{
+  assert.ok(auditRegistry.documents.length >= 1);
+  for(const document of auditRegistry.documents){
+    assert.equal(document.status,"published");
+    assert.equal(document.authority?.governance_effect,false);
+    assert.equal(document.authority?.financial_effect,false);
+    assert.equal(document.authority?.ownership_effect,false);
+    assert.equal(document.authority?.role_effect,false);
+  }
 });
