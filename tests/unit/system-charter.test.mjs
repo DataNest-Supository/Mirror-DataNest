@@ -40,8 +40,8 @@ test("System Charter is embedded in React and static transparency surfaces",()=>
 });
 
 test("public discovery assets expose charter without granting market authority",()=>{
-  assert.ok(sitemap.includes("/DataNest/system-charter/"));
-  assert.ok(robots.includes("Sitemap: https://datanest-supository.github.io/DataNest/sitemap.xml"));
+  assert.ok(sitemap.includes("/Mirror-DataNest/system-charter/"));
+  assert.ok(robots.includes("Sitemap: https://datanest-supository.github.io/Mirror-DataNest/sitemap.xml"));
   assert.equal(visibilityIndex.authority.productionAuthorization,false);
   assert.equal(visibilityIndex.authority.marketingSpend,false);
   assert.equal(visibilityIndex.authority.bindingSales,false);
