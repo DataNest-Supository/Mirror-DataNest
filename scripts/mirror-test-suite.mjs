@@ -12,7 +12,8 @@ const excluded=new Set([
   "ronsas-cloud-integration.test.mjs",
   "ui-production-authorization.test.mjs",
   "ui-test-mode.test.mjs",
-  "worktree-gate-timeframes.test.mjs"
+  "worktree-gate-timeframes.test.mjs",
+  "edge-connector-attestation-source.test.mjs"
 ]);
 
 const tests=readdirSync("tests/unit")
