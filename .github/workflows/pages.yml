@@ -91,9 +91,20 @@ jobs:
         continue-on-error: true
         run: npm audit --omit=dev --audit-level=high
 
-      - name: Record pre-release observations
+      - name: Hard pre-release verification gate
         if: always()
-        run: echo "Mirror pre-release observations are advisory and do not block the Mirror production deployment."
+        shell: bash
+        run: |
+          set -euo pipefail
+          failures=()
+          [ "${{ steps.unit_tests.outcome }}" = "success" ] || failures+=("unit tests")
+          [ "${{ steps.type_check.outcome }}" = "success" ] || failures+=("type check")
+          [ "${{ steps.dependency_audit.outcome }}" = "success" ] || failures+=("dependency audit")
+          if [ "${#failures[@]}" -gt 0 ]; then
+            printf '::error::Mirror production blocked: %s\n' "${failures[*]}"
+            exit 1
+          fi
+          echo "Mirror pre-release verification gate passed."
 
       - name: Validate isolated production Supabase runtime values
         env:
@@ -229,7 +240,6 @@ jobs:
 
       - name: Verify live release manifest and static routes
         id: live_routes
-        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -302,7 +312,6 @@ jobs:
 
       - name: Run live visual and functional browser tests
         id: browser_tests
-        continue-on-error: true
         env:
           PLAYWRIGHT_BASE_URL: https://datanest-supository.github.io
           DATANEST_APP_PATH: /Mirror-DataNest/
@@ -355,7 +364,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
-      - name: Record live verification result without deployment gating
+      - name: Record live verification result
         if: always()
         env:
           ROUTE_OUTCOME: ${{ steps.live_routes.outcome }}
@@ -369,6 +378,6 @@ jobs:
             echo "Mirror production evidence is authoritative for the Mirror surface; canonical /DataNest/ release requires separate canonical review."
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$ROUTE_OUTCOME" != success ] || [ "$BROWSER_OUTCOME" != success ]; then
-            echo "::warning::Mirror production deployment has unsuccessful live observations. Inspect the evidence artifact before canonical handoff."
+            echo "::error::Mirror production live verification failed. Inspect the evidence artifact before canonical handoff."
           fi
 # Production evidence re-run marker: validate live deployment after shell-quoting correction.
