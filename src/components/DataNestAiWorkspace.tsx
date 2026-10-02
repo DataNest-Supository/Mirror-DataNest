@@ -293,7 +293,6 @@ export default function DataNestAiWorkspace({
     {jobsError&&<section className="panel" role="alert"><p>{jobsError}</p><button className="secondaryButton" disabled={jobsLoading} onClick={()=>void loadJobs()}>Retry loading jobs</button></section>}
     {contextError&&<section className="panel" role="alert"><h3>Job context needs attention</h3><p>{contextError}</p><p className="muted">Your draft is preserved. Retry context loading before sending another command.</p><button className="secondaryButton" disabled={loading} onClick={()=>void refreshContext()}>Retry AI context</button></section>}
 
-      <section className={"datanestAiHero datanestAiHeroV2 "+(loading?"isWorking":"isReady")} aria-label="DataNest AI development command center">
       {!focusMode&&<section className={"datanestAiHero datanestAiHeroV2 "+(loading?"isWorking":contextReady?"isReady":"needsAttention")} aria-label="DataNest AI development command center">
       <div className="datanestAiHeroGrid" aria-hidden="true"/>
       <div className="datanestAiHeroGlow datanestAiHeroGlowOne" aria-hidden="true"/>
