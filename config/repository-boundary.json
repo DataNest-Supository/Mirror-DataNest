@@ -133,8 +133,7 @@
         ".github/CODEOWNERS",
         "tests/unit/branch-protection-tree.test.mjs",
         "docs/governance/BRANCH_X_PROTECTION.md",
-        "evidence/**",
-        "schemas/**"
+        "evidence/owner-test-mode-rate-limit-fix-2026-10-01.md"
       ]
     },
     {
