@@ -1,7 +1,6 @@
 "use client";
 
 import OwnerDevelopmentAnalytics from "@/components/OwnerDevelopmentAnalytics";
-import HumanReviewPanel from "@/components/HumanReviewPanel";
 
 type HealthState = { state:"checking"|"online"|"degraded"|"offline"; checkedAt:string|null; message:string };
 type Summary = { total:number; active:number; running:number; blocked:number; available:number; registered:number };
