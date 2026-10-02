@@ -62,11 +62,6 @@ export default function OwnerRDCockpit({
       {jobs.length ? <div className="jobTable">{jobs.slice(0,6).map(job=><div className="jobTableRow" key={job.id}><b>JOB-{String(job.job_number).padStart(5,"0")}</b><div><strong>{job.title}</strong><small>P{job.priority}</small></div><span><span className={"badge "+job.status.toLowerCase()}>{job.status.replaceAll("_"," ")}</span></span></div>)}</div> : <div className="emptyState"><div>◇</div><h3>No active development work</h3><p>Start with DataNest AI, an experiment, or a build manifest.</p><button className="secondaryButton compact" onClick={()=>onNavigate("ai")}>Start with DataNest AI</button></div>}
     </section>
 
-    <HumanReviewPanel
-      repository="DataNest-Supository/DataNest"
-      pullRequestNumber={390}
-      expectedReviewer="ResonanceAppDev"
-    />
 
     <OwnerDevelopmentAnalytics projectId={projectId} compact />
 
