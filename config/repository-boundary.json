@@ -8,6 +8,8 @@
     {
       "policy": "canonical_only",
       "patterns": [
+        "evidence/**",
+        "schemas/**",
         "evidence/native-protection/**",
         ".github/workflows/mirror-production-import.yml",
         ".github/workflows/notify-mirror-canonical.yml",
