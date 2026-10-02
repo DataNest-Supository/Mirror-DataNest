@@ -40,6 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Enforce native BRANCH-X protection before production build
+        id: native_branch_x
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -92,7 +93,7 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
       - name: Hard pre-release verification gate
-        if: always()
+        if: always() && (github.event_name == 'pull_request' || github.ref != 'refs/heads/main' || steps.native_branch_x.outcome == 'success')
         shell: bash
         run: |
           set -euo pipefail
