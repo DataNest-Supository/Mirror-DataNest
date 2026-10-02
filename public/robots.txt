@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://datanest-supository.github.io/Mirror-DataNest/sitemap.xml
