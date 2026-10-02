@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "datanest-visibility-utility-public-v1",
+  "tree": "VISIBILITY-UTILITY",
+  "authority": {
+    "marketIntelligence": true,
+    "productionAuthorization": false,
+    "marketingSpend": false,
+    "bindingSales": false
+  },
+  "evidence": {
+    "branch": "main",
+    "latestStateUrl": "https://datanest-supository.github.io/Mirror-DataNest/transparency/visibility-utility/state/latest.json",
+    "latestRouteToMarketUrl": "https://datanest-supository.github.io/Mirror-DataNest/transparency/visibility-utility/projections/route-to-market.json"
+  },
+  "projectionNotice": "Route-to-market outputs are evidence-labelled scenarios, not guaranteed outcomes."
+}
